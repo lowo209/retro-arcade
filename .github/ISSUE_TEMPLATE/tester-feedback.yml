@@ -1,0 +1,28 @@
+name: Tester feedback
+description: Report an interface problem or suggest an improvement.
+title: '[Tester feedback]: '
+body:
+  - type: markdown
+    attributes:
+      value: 'This release previews the cabinet, library and game pages. Commercial game playback is outside this public preview.'
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      placeholder: Library, cabinet, or a game-detail page
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Firefox on Windows, Safari on iPhone, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: feedback
+    attributes:
+      label: What happened or what would you improve?
+      description: Include steps, what you expected and any useful screenshots.
+    validations:
+      required: true

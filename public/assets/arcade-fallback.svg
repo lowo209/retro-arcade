@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 520" role="img" aria-labelledby="title">
+<title id="title">Charcoal Retro Arcade cabinet with orange trim, a CRT, joystick and four buttons</title>
+<defs><linearGradient id="side" x2="1" y2="1"><stop stop-color="#414347"/><stop offset="1" stop-color="#1a1c20"/></linearGradient><linearGradient id="glass" x2=".3" y2="1"><stop stop-color="#193130"/><stop offset="1" stop-color="#090f13"/></linearGradient><radialGradient id="shadow"><stop stop-opacity=".7"/><stop offset="1" stop-opacity="0"/></radialGradient></defs>
+<ellipse cx="294" cy="469" rx="171" ry="31" fill="url(#shadow)"/>
+<path d="m353 39 65 36v357l-65 28-34-165 9-111z" fill="url(#side)" stroke="#9c623f" stroke-width="3"/>
+<path d="M150 41h203v126l-17 112 22 21v160H154V300l-15-23 19-23-8-103Z" fill="#24272a" stroke="#d08752" stroke-width="3"/>
+<path d="m159 169 184-1-14 94-172-6Z" fill="#101315"/>
+<rect x="168" y="58" width="168" height="47" rx="2" fill="#151b1e" stroke="#525355" stroke-width="6"/>
+<text x="251" y="86" fill="#efae7b" font-family="Arial,sans-serif" font-size="17" text-anchor="middle" font-weight="bold">RETRO<tspan fill="#f5e6d5" font-weight="normal">ARCADE</tspan></text>
+<path d="m166 130 169 1-13 122-149-2Z" fill="#0d0f11" stroke="#343a3e" stroke-width="12"/>
+<path d="m181 145 139 1-10 92-122-1Z" fill="url(#glass)" stroke="#475152"/>
+<text x="251" y="183" text-anchor="middle" fill="#efb17d" font-family="monospace" font-size="12">ONE MORE</text><text x="251" y="202" text-anchor="middle" fill="#efb17d" font-family="monospace" font-size="17" font-weight="bold">ROUND.</text><text x="251" y="225" text-anchor="middle" fill="#a2aaa1" font-family="monospace" font-size="6">OPEN GAME LIBRARY &gt;</text>
+<path d="m158 260 171 3 29 37H147Z" fill="#3b3b3b" stroke="#bf7b4b" stroke-width="2"/>
+<ellipse cx="200" cy="280" rx="17" ry="6" fill="#111416"/><path d="m200 280-3-26" stroke="#9b9e9d" stroke-width="5"/><circle cx="197" cy="252" r="10" fill="#e69152"/>
+<g stroke="#111" stroke-width="4"><ellipse cx="269" cy="276" rx="9" ry="5" fill="#e69152"/><ellipse cx="293" cy="276" rx="9" ry="5" fill="#d2c5a2"/><ellipse cx="278" cy="289" rx="9" ry="5" fill="#a34e39"/><ellipse cx="302" cy="289" rx="9" ry="5" fill="#ded6bf"/></g>
+<path d="M158 307h188v141H158Z" fill="#25282b"/><rect x="226" y="334" width="47" height="67" rx="3" fill="#141619" stroke="#45484a"/><rect x="236" y="344" width="27" height="8" fill="#b27a52"/><path d="M244 345v7" stroke="#111" stroke-width="3"/><rect x="236" y="368" width="27" height="18" fill="#080b0d"/><path d="M168 429h168" stroke="#15181a" stroke-width="15"/>
+</svg>

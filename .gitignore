@@ -1,0 +1,33 @@
+# Private games, firmware, generated game code, local runtime dependencies.
+/private/
+/vendor/
+/.local/
+/exports/
+/dist/
+/node_modules/
+__pycache__/
+*.py[cod]
+*.log
+.DS_Store
+Thumbs.db
+# Defense in depth: never stage game images, archives, firmware, or native programs.
+*.bin
+*.cue
+*.iso
+*.chd
+*.pbp
+*.img
+*.mdf
+*.mds
+*.rom
+*.zip
+*.7z
+*.rar
+*.exe
+*.dll
+*.wasm
+*.data
+*.ps2
+*.srm
+*.state
+*.sbi

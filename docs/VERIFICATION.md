@@ -1,0 +1,134 @@
+# Verification log
+
+## 24 October 2026 — GitHub interface-preview release
+
+- The user confirmed that restarting Windows restored Firefox gameplay. Its report showed device reset/removal and older cached driver information beside the newer WebGPU driver. No browser/security settings were forced.
+- Prepared a separate static interface-preview build for GitHub Pages after the user selected this scope. Kept the current design and deferred the redesign. Added repository-path-safe asset/navigation URLs, a preview-only catalogue without local API calls, explicit interface-preview status, game-detail/control pages and a tester-feedback issue form. The playable local mode remains separate.
+- Builder copies 22 fixed assets, including original SVG library art and locally bundled Three.js/license. Its tests reject accidental extra files, missing/linked sources and unsafe base paths. No commercial game data, private cover scans, firmware or emulator binaries enter the public artifact. Source-only export includes the Pages workflow and issue form.
+- All 15 automated tests pass. Browser checks under `/retro-arcade/`: cabinet START reaches CRT ready, search Ghost returns one card, PlayStation filter returns six, favorites adds/removes RE3 correctly, and AC3's detail page displays one player's controls with no launch iframe. At 390 × 844, detail-page client/scroll widths both equal 375 CSS pixels. GitHub deployment/live-site verification is recorded separately when complete.
+
+## 24 October 2026 — Firefox startup failure
+
+- The user's Firefox console identifies unavailable graphics contexts: `FEATURE_FAILURE_EGL_NO_CONFIG`, `FEATURE_FAILURE_WEBGL_EXHAUSTED_DRIVERS`, followed by a missing `GLctx` exception during emulator startup. Both the initial graphics probe and the game runtime report context-creation failure. This failure requires restoring browser WebGL availability; a website patch cannot repair Firefox's graphics driver/context creation.
+- Added a graphics preflight before library/runtime/disc loading. It accepts WebGL2 or WebGL1 and releases its temporary context; a WebGL2 failure alone does not reject browsers capable of the existing legacy renderer. If both fail, the player explains the issue and links to a local browser-help page with Mozilla's performance/driver documentation.
+- EmulatorJS catches startup errors without firing window error events. A startup-only observer now surfaces its error label and captured warning/exception detail to the player and parent status. Console methods and observer are restored on failure, successful startup or page exit. The first failure is retained if a later runtime-abort error occurs. Game files, emulator binaries, firmware, saves and control storage are unchanged.
+- Added tests for WebGL2/WebGL1 detection and context release, missing/blocked/lost contexts, the real frame's early abort before library/ROM/runtime loading, caught upstream startup exceptions, and cleanup after success. All 12 automated tests pass. First-party JS syntax checks pass.
+- Firefox UI inspection was stopped by the browser tool because URL-policy enforcement is unsupported for Windows Firefox. No live Firefox retest or screenshot of the new help screen was possible this turn. Actual recovery remains pending a browser graphics change and retry; earlier gameplay checks were in the app's browser.
+
+## 24 October 2026 — Three PAL games and GT2 Arcade disc
+
+- Added Ace Combat 3: Electrosphere (European international edition), Ghost in the Shell (Europe) and G-Police: Weapons of Justice (Europe) to the existing library/player, private routes and importer. All are single player; their second-player controls are hidden. Added unique save IDs 106, 107 and 108 without changing existing game IDs or custom-control storage.
+- Installed the supplied European GT2 Arcade disc as the main launch; retained the US Simulation disc and its separate save ID 104. Boot IDs: AC3 `SCES_020.66`, Ghost `SCES_010.50`, G-Police `SCES_016.25`, GT2 Arcade `SCES_023.80`. CUE references, ISO9660 signatures and whole raw sectors were checked. Full CRC validation passes for all four installed CUE/BIN ZIPs.
+- RE3 was already installed. Compared its exact supplied CUE bytes and streamed source-BIN CRC against the existing archive: they match. Existing RE3 archive, cover and save ID 105 are retained.
+- Three original European PAL front-cover JPEGs were downloaded from explicitly labelled original front-cover galleries and inspected. Their exact bytes, source URLs, dimensions and SHA-256 hashes are documented in [COVERS.md](COVERS.md). All eight covers are private; prior five images remain untouched. JPEG MIME/allowlisting and correct image decode were checked.
+- The existing verified SCPH1001 BIOS is retained. [PCSX ReARMed's own BIOS documentation](https://docs.libretro.com/library/pcsx_rearmed/#bios) describes retail BIOS support across regions. Added checksum support for optional European SCPH5502 without renaming any BIOS bytes or obtaining firmware online. Some PAL titles can need matching SBI sidecars: importer retains a matching user-supplied file, and source/Git safety excludes SBI data. No SBI accompanied these new files. A synthetic importer check preserved exact SBI bytes and rejected an outside-folder CUE track path.
+- All 7 automated tests pass with expanded new-title route/range/firmware checks, JPEG allowlisting and keyboard-profile checks. Source-only exports omit private games, firmware, cover scans, SBI and Python caches. Library reports **7 ready to launch / 8 classics**. Four-column desktop layout accommodates two rows; GT4 remains experimental with no browser build.
+- Final library browser check: all eight covers decode, including the three original PAL JPEGs. Searching Ghost returns one card; the PlayStation filter returns six. At 390 × 844, client/scroll widths both equal 375 CSS pixels, with the existing two-column cards and no page overflow. No browser console errors were reported. Saved desktop proof at `.local/library-eight-games.jpg`; gameplay proofs remain local as well.
+- **Ace Combat 3:** original title, New Game/Easy selection, first mission briefing, EF2000E aircraft selection and actual first-mission flight HUD rendered. D banked the aircraft; A returned its bank. This is a new player mission, not the attract replay. Campaign completion, save restoration, sound quality, physical gamepad and frame-rate claims remain unverified.
+
+
+- **Ghost in the Shell:** original opening movies, title menu, Mission 1 selection, mission launch sequences and ranking menu render and respond to keyboard input. An idle Mission 1 attempt ended in the normal Mission Failed screen. Sustained Fuchikoma movement/combat and saves are not certified by this check.
+- **G-Police: Weapons of Justice:** original startup, New Game/Mission 1 menu, briefing and loadout screens work. Launched the actual Havoc gunship mission, dismissed its training prompt, then used J for forward thrust and D for a turn/bank; HUD speed/view changed (22 to 51). Sound, campaign progress, saves and physical gamepads remain unverified.
+
+- **GT2 Arcade:** checked the supplied BIN against [Libretro's Redump metadata](https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/redump/Sony%20-%20PlayStation.dat): size `667965648`, CRC `E894A117` both match the SCES-02380 entry. The original intro, 3D attract replay and title explicitly labelled ARCADE MODE DISC render in a fresh browser page. Started Single Player → Road Race → Easy → Class A → Corvette Coupe → automatic/racing → Tahiti Road. W accelerated the player's car to 89 km/h; D changed heading. S was issued before a 0 km/h observation near a barrier, so isolated braking behavior was not established. This was an actual new race, not an attract replay. Initial black loading/transition screens were observed; they were not evidence of a bad dump. Split-screen, PAL save restoration and sound still require checks. No alternate core or game-data patch was retained.
+
+## 24 October 2026 — Interactive cabinet and modern keyboard profiles
+
+- Replaced only the hero illustration with a procedural Three.js 0.180.0 cabinet, bundled locally with its MIT notice. Refined the sloped deck, button spacing, visible START control, recessed convex CRT, side panels and restrained contact shadow in browser previews. The original theme, typography, library cards and navigation remain.
+- Browser checks: each of the four physical button meshes reports its own A/B/C/D input. Joystick pointer drag acquires the ball and releases without activating the screen behind it. START shows the CRT boot and ready state. Clicking the screen navigates to the existing `#library` anchor. HTML button alternatives, keyboard joystick input and optional camera toggle were exercised. Desktop and 390 × 844 layouts were inspected; mobile client/scroll widths both equal 375 CSS pixels. Actual touchscreen and OS reduced-motion preference checks remain pending; those input/motion paths are implemented. A Node test exercises actual WebGL-constructor failure and confirms the static fallback and library guidance survive.
+- The new RE3 Nemesis PNG is copied unchanged into private storage. SHA-256: `5a346582fcc6cd977b4eaaaa4100adb2adf3f2cf646bade03d6cc3e03627067d`. All five supplied covers remain outside Git/source exports.
+- Shared `EJS_defaultControls` profiles are supported by the installed runtime and official control mapping. UMK3/RE3 use WASD directions; racing uses W/S for Cross/Square pedals and A/D for steering, with I/K menu up/down. Existing saved bindings still take precedence; Controls → Reset adopts defaults without clearing saves. Gamepad/analog mappings and game IDs are retained. Player 2 has independent arrows/numpad inputs; physical numpad rollover/gamepads and new two-player gameplay have not been certified.
+- **UMK3:** original coin/Start, D navigation to a different fighter, J selection, CPU fight and W jump checked with the new profile. The six arcade actions remain generic RetroPad labels because attack assignments belong to the core. Save-state limitation remains.
+- **NFS:** verified the new actual emulator mapping in its visible Controls panel, navigated menus with I/K/A/D/W/U, bought a starter Mercedes using fictional game credits, and started a real six-car race. W reached 59 km/h; D changed heading; S braked to 0. Fresh Save State/Load State both reported browser success; loading restored an earlier stationary view and timer (later view 00:41.48, restored view then 00:39.48 as it continued). An initial attempt to load a slot without a usable stored state produced upstream `Unsupported data type`; the normal game continued and a newly created state loaded correctly. Do not treat an empty-slot load as a saved game.
+- **RE3:** the modern profile navigates the title/load/card screens and selects New Game/Easy Mode. The opening street renders; W/A input changes Jill's position/facing before the next opening sequence. Short input/startup check only; sustained combat, memory-card/state restoration and sound remain unverified.
+- **GT2 Simulation:** booted to the original Simulation Mode title, entered the city map, navigated to Licence/B class and started the B-1 acceleration/braking exercise. W accelerated the Toyota Vitz to 29 mph; S brought it to 0. This is actual driving input on the supplied Simulation disc, not an attract replay. At this earlier check, the Arcade disc had not yet been supplied; see the newer disc-import check above.
+- Final physical START check caught the small cap moving away from the release ray. Added a 12-pixel tap tolerance for captured buttons; deliberate drags cannot activate buttons or screen navigation. Retested physical START and joystick release successfully. A read-only input/lifecycle review found no further blocker. All 7 automated tests pass; all first-party JavaScript passes syntax/UTF-8 checks. Git safety finds no eligible private/binary assets.
+- GT4 still has no compiled browser build. No WSL/OS changes or game uploads were performed. [BUILD-ENVIRONMENT.md](BUILD-ENVIRONMENT.md) provides Microsoft's WSL install/Ubuntu initialization steps and the actual upstream tool list.
+
+
+
+
+## 24 October 2026 — Resident Evil 3 and public GT4 investigation
+
+- Added **Resident Evil 3: Nemesis, US PS1** to the real EmulatorJS integration, private game/cover mounts, one-time importer, saves namespace (ID 105), file checklist and favorites/search catalogue. The installed disc's MODE2/2352 CUE references its BIN correctly; the BIN has a valid ISO9660 descriptor, whole sectors and boot ID `SLUS_009.23`. The local ZIP's full CRC check passes. It reuses the verified SCPH1001 BIOS. No game download or native executable was used.
+- Browser check in the in-app Chromium browser: original RE3 title menu, save-card screens and New Game difficulty selection responded to keyboard input. Selected Easy Mode; the original opening movie and first in-game scene rendered. The idle gameplay check reached a normal Game Over. This verifies boot and new-game startup, **not** a completed playthrough, sustained movement/combat, audio quality, frame rate, gamepad support or memory-card/state restoration. Those RE3 checks remain unverified.
+- Single-player labels and controls checked: Player 1 is visible; Player 2 is hidden on RE3's page. The existing multiplayer pages keep their second layout. RE3 uses an original illustrative SVG fallback; the four previously supplied covers remain unchanged in private storage.
+- Five game cards render. Status reports **3 ready to launch / 5 classics** (UMK3, NFS, RE3). PlayStation filter returns 3; searching Resident returns 1. Mobile client/scroll widths are both 375 CSS pixels under the 390 × 844 override. The desktop layout now accommodates five covers; medium widths use three columns and small screens retain two.
+- All 3 automated server tests pass, with added RE3 route HEAD/allowlist checks and invalid-BIOS readiness checks. Git checks confirm RE3's ZIP and the shared BIOS stay excluded. Source export still includes only original website source and fallback art.
+- Inspected the user's downloaded `ps2-web-recomp-main/ps2-web-recomp-main` source. No generated browser game artifacts were found. `scripts/port.sh` performs the offline/build-machine translation and compilation; `web/shell.html` expects a disc URL, and its file input imports memory cards, not arbitrary game ISOs. README snapshot SHA-256: `4d0dcffe655fc3f2e8e5e80c9161ba8467253794b2e398b8ae06af7df07da31e`.
+- Rechecked build tools: WSL reports it is not installed; CMake, Ninja, clang and bash were not found on PATH. No WSL/OS changes or GT4 build were attempted without those prerequisites. No GT4 gameplay support is newly claimed.
+- The user clarified that public games should **start from the link alone**, without visitor file selection. [PUBLIC-ARCADE.md](PUBLIC-ARCADE.md) documents that target: developer-side compilation, supported-browser requirements, authorized game-asset hosting, HTTPS/isolation/range support and the current blockers. No private games, BIOS, supplied covers or game-derived modules have been uploaded or publicly deployed.
+
+## Follow-up: new PS1 files and cover / interaction changes
+
+This section supersedes the missing-file status in the original run recorded below.
+
+- **SCPH1001 validated and installed:** 524,288 bytes; MD5 `924e392ed05558ffdb115408c263dccf`, matching the official EmulatorJS BIOS list. The app now accepts either that BIOS or the already documented SCPH5501 checksum, preserving each correct filename and selecting a verified dump automatically.
+- **NFS PS1 disc verified:** matching CUE, MODE2/2352 track with no partial-sector remainder, ISO9660 signature and `SYSTEM.CNF` boot ID `SLUS_008.26`. Both files are packaged in private storage, and the resulting ZIP passes CRC validation. No native EXE was used.
+- **NFS actual gameplay verified:** original intro, menus, track selection, in-game car dealer, BMW Z3 purchase using fictional starting credits, and a real six-car race. X accelerated the car from stationary to 57 km/h; Right steering changed its heading. This is player-controlled gameplay, not the attract-mode replay.
+- **NFS browser save/load verified:** Save State displayed `SAVE SAVED TO BROWSER`. Loading it restored an earlier position and race timer (from a later 00:49.92 view to the earlier state, then 00:45.48 as play resumed). No replacement event handlers intercept the emulator save actions. In-game memory-card save/export, audio, frame-rate benchmarks, physical controllers, police pursuits and split-screen remain unverified.
+- **GT2 Simulation boot verified:** the same BIOS boots the supplied Simulation disc through its intro/replay and to the original title menu explicitly labelled `SIMULATION MODE DISC`, with Start Game and Replay Theater. No Simulation race or save check was performed. The separate Arcade disc is still missing, so requested Arcade/split-screen play remains unavailable.
+- **All four supplied PNG covers installed unchanged:** byte-for-byte SHA-256 comparisons with the four provided attachment files passed. They remain in ignored `private/covers/`, mounted only at four allowlisted PNG routes. The source export retains SVG fallbacks; cover art is not included or MIT-licensed.
+- **Library interaction checks:** favoriting NFS produces one Favorites result and survives reload; Ready to launch returns UMK3 and NFS (2 cards); search `gran` returns 2 results. The test favorite was removed afterward. Keyboard focus reveals the card action and border treatment; covers retain their full images with blurred backdrops. Pointer tilt/glow and lift/zoom have reduced-motion and touch safeguards. The original card-entry animation's persistent transform was corrected so hover transforms can take effect.
+- **Mobile:** at a 390 × 844 override, client width and scroll width both report 375 CSS pixels (the scrollbar takes the remainder), with no horizontal page overflow. The larger filter set scrolls within its own row. Favorite targets and both card columns fit.
+- **Server tests:** all 3 tests pass with added checks for allowlisted cover routes, denial of other/private cover files, the SCPH1001 mount and invalid-firmware gating. Git checks confirm the NFS disc, BIOS and cover files are ignored.
+
+The current file checklist and import commands are in [FILES.md](FILES.md). Audible sound, native Chrome and physical controllers still need a hands-on check.
+
+## Original run
+
+## Tested environment
+
+Windows 11 workstation; Node.js **20.18.1**, Python **3.12.12**. Browser interaction was tested in the **Codex in-app Chromium browser** against the real local Node server at `http://127.0.0.1:3000`. A standalone Google Chrome installation was not found in the standard installation paths or available app inventory, so separate Chrome testing remains pending. No native game executable was launched.
+
+The local server tests required permission to use loopback networking in the tool sandbox. That restriction belongs to the test environment, not the website. The server passed its tests when loopback access was available.
+
+## Website and local server
+
+Verified in the browser:
+
+- Four game cards with original local SVG illustrations and accurate availability labels.
+- PlayStation filter returns 2 cards; searching `gran` returns 2 cards; an unmatched search shows the empty message; clearing it restores the library.
+- About dialog opens and closes; library navigation and game-detail links work.
+- Desktop (1440 × 1000 viewport override), normal side-panel width and mobile (390 × 844 override) layouts inspected. Mobile DOM widths match: no horizontal page overflow.
+- NFS and GT2 have no launch button when the required PS1 assets are missing. GT2 explicitly detects the separate Simulation disc and missing BIOS.
+- GT4 remains experimental and has no launch button without compiled artifacts; its setup guide opens.
+- Invalid game IDs show a useful error and a library link.
+- Fullscreen entry and the explicit **Exit fullscreen** button work. The in-app browser did not consistently exit with an injected Escape key, so there is a visible fallback. Physical Escape behavior in standalone Chrome remains to be checked.
+- Restart session removes the iframe (0 remaining players) and returns to a visible launch button.
+
+Automated tests (`npm test`): **3 passing tests**, covering valid and invalid byte ranges; real HTTP GET/HEAD/206/416 responses; COOP/COEP headers; denial of private config, Git/source files, traversal paths, foreign Host headers and writes; safe library API output; missing/invalid firmware gating; separate Simulation-disc handling; and refusing to advertise an unsupported CHD as ready.
+
+Git safety check (`npm run check`) verifies tracked and eligible untracked filenames against private directories and game/binary extensions. `git check-ignore` confirms UMK3, the GT2 Simulation ZIP, local config and emulator dependencies are excluded. The source exporter uses an allowlist and excludes all private and vendor files.
+
+## Ultimate Mortal Kombat 3
+
+**Actual original arcade gameplay verified**, using EmulatorJS 4.2.3 and its supplied `mame2003_plus` core. All 26 supplied rev 1.2 ROM parts match expected CRCs and lengths. Some supplied filenames are aliases (for example `mk3-u3.bin`); setup writes those byte-identical parts into the ZIP with the driver's expected filenames. No game bytes were changed.
+
+Observed boot: rev 1.2 checks, CMOS OK, advisory screen, attract mode, mode selection, fighter selection and the CPU ladder. A real fight against a CPU opponent ran; Player 1's movement and action inputs responded.
+
+**Local keyboard multiplayer verified:** Player 2 coin/start input joined the session. A Kitana versus Scorpion match showed win counters on both sides; Player 2's F key moved Scorpion left and U triggered his action animation independently of Player 1. Physical simultaneous keyboard rollover will depend on the user's keyboard. USB/Bluetooth gamepads were not available for hands-on testing.
+
+**Save states failed:** Save State during actual gameplay reported `FAILED TO SAVE STATE`; the core logged `Size is zero`. The installed core metadata also declares `save: false` for save files. Broken save/load-state toolbar buttons are hidden for UMK3, and the page explains that progress is not persistent. No successful state or NVRAM restoration is claimed.
+
+**Audio / performance:** emulation animated and responded throughout CPU and two-player checks. Audible output, end-to-end audio latency, sustained frame rate and physical gamepad behavior were not measured. No specific FPS or sound-quality claim is made.
+
+The first boot exposed the optional upstream CDN update check as an unhandled offline fetch. The installer now reproducibly disables that optional call in the local minified runtime and retained source. A CSS bug that kept a hidden boot-error overlay visible was fixed. Subsequent boots displayed gameplay without that overlay or new updater errors. CSP prevents external network fallbacks.
+
+## Need for Speed: High Stakes
+
+**Integrated, not boot-tested.** Supplied files contain the Windows edition (`nfs4.exe`), not a PS1 disc. No PS1 firmware was supplied. No race, sound, CPU opponent, split-screen, save or physical-controller result can be verified yet.
+
+The actual pinned PCSX core's embedded `core.json` advertises CUE/BIN and PBP, but not CHD. The integration therefore prefers a ZIP containing the CUE and all BIN tracks, or PBP. CUE selection is explicitly enabled so track metadata is preserved. This corrects the initial generic suggestion that a CHD would be suitable without checking this particular core build.
+
+## Gran Turismo 2
+
+**Integrated, not boot-tested.** Supplied Simulation Mode v1.2 BIN/CUE is packaged in private storage as `gt2-simulation.zip`. The requested Arcade disc and US PS1 BIOS are missing. Simulation Mode is never relabelled as Arcade Mode. The optional Simulation launch stays unavailable until a supported BIOS is supplied. Races, sound, split-screen, saves and physical controllers remain unverified.
+
+## Gran Turismo 4
+
+**Experimental integration point; no browser game build installed.** The ISO9660 root was read without copying the ISO: `SYSTEM.CNF` identifies `SCUS_973.28` and `VMODE = NTSC`, confirming the supplied US edition. No game executable was extracted or launched.
+
+The actual upstream README, web shell, build script and range-server source were inspected. Upstream describes a PAL GT4 demonstration; this US executable requires its own recompilation. The workstation reports WSL is not installed, and CMake, Ninja and clang were not on PATH. No toolchain installation or OS change was performed. The documented WSL2 route is an inference from upstream's Linux workflow, not a tested port on this machine.
+
+The integration serves a user's future browser build privately with range streaming and isolation headers. That route does not establish gameplay compatibility. GT4 keyboard/gamepads, audio, speed, saves and local multiplayer remain **unverified**. Full steps and limitations are in [GT4.md](GT4.md).

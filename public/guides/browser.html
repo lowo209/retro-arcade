@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Browser graphics help — Retro Arcade</title><link rel="stylesheet" href="/styles.css"></head>
+<body>
+<main class="page-width" style="max-width:760px;margin:60px auto;padding:0 24px">
+  <a href="/">← Back to the library</a>
+  <p class="eyebrow" style="margin-top:40px">BROWSER HELP</p>
+  <h1>Restore game graphics.</h1>
+  <section class="detail-section">
+    <p>The player needs WebGL, your browser’s graphics interface. If the browser cannot create a graphics context, every game using this player can fail before it starts. Replacing the game disc or BIOS will not restore browser graphics.</p>
+    <h2>In Firefox</h2>
+    <ol style="line-height:1.9;padding-left:22px">
+      <li>Open Firefox’s Settings and search for <strong>Performance</strong>.</li>
+      <li>Uncheck <strong>Use recommended performance settings</strong> to reveal the hardware acceleration option.</li>
+      <li>If <strong>Use hardware acceleration when available</strong> is off, turn it on.</li>
+      <li>Fully close and reopen Firefox, then retry the game.</li>
+    </ol>
+    <p>If acceleration is already on or the option is unavailable, a graphics driver problem may be involved. Check <a href="https://support.mozilla.org/en-US/kb/upgrade-graphics-drivers-use-hardware-acceleration" target="_blank" rel="noopener noreferrer">Mozilla’s graphics troubleshooting guide</a>. Restart after installing a driver update.</p>
+    <p>Mozilla documents the setting and required restart in <a href="https://support.mozilla.org/en-US/kb/performance-settings" target="_blank" rel="noopener noreferrer">Firefox’s performance settings</a>.</p>
+    <h2>Try another browser</h2>
+    <p>Open this same local address in an installed Chrome or Edge browser and try a game. If that browser can create a WebGL context, it can use the existing game files. Saves and custom controls are stored separately in each browser.</p>
+    <h2>If it still fails</h2>
+    <p>Keep the detailed error shown by the player. In Firefox, <code>about:support</code> has a Graphics section that can explain why WebGL is unavailable. Share the WebGL failure reason when asking for help.</p>
+  </section>
+</main>
+</body>
+</html>

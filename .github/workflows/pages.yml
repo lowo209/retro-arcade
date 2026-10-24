@@ -1,0 +1,54 @@
+name: Publish interface preview
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Run regression checks
+        run: npm test
+      - name: Check source publication boundaries
+        run: npm run check
+      - name: Configure Pages
+        id: pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - name: Build interface preview
+        env:
+          PAGES_BASE: ${{ steps.pages.outputs.base_path }}
+          PREVIEW_REPOSITORY: ${{ github.repository }}
+        run: npm run build:preview -- --base="${PAGES_BASE:-/retro-arcade}/" --repository="$PREVIEW_REPOSITORY"
+      - name: Upload preview
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy interface preview
+        id: deployment
+        uses: actions/deploy-pages@v4
