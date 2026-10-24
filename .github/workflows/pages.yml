@@ -1,4 +1,4 @@
-name: Publish interface preview
+name: Publish tester site
 on:
   push:
     branches: [main]
@@ -28,16 +28,17 @@ jobs:
         id: pages
         if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
-      - name: Build interface preview
+      - name: Build tester site
+        id: build
         env:
           PAGES_BASE: ${{ steps.pages.outputs.base_path }}
           PREVIEW_REPOSITORY: ${{ github.repository }}
-        run: npm run build:preview -- --base="${PAGES_BASE:-/retro-arcade}/" --repository="$PREVIEW_REPOSITORY"
-      - name: Upload preview
+        run: npm run build:pages -- --base="${PAGES_BASE:-/retro-arcade}/" --repository="$PREVIEW_REPOSITORY"
+      - name: Upload tester site
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
         with:
-          path: dist
+          path: ${{ steps.build.outputs.directory }}
   deploy:
     if: github.event_name != 'pull_request'
     needs: build
@@ -49,6 +50,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy interface preview
+      - name: Deploy tester site
         id: deployment
         uses: actions/deploy-pages@v4

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import { probeGraphics, watchStartup } from '../public/startup-diagnostics.js';
+import { siteUrl } from '../public/catalog.js';
 
 test('graphics preflight accepts WebGL2, falls back to WebGL1 and releases its test context', () => {
   for (const version of [1, 2]) {
@@ -36,6 +37,7 @@ test('the real frame stops before library, ROM or runtime loading when browser g
   };
   await vm.runInNewContext(`(async () => { ${source} })()`, {
     GAMES: [{ id: 'gpolice2' }], defaultControls: () => ({}),
+    siteUrl: value => siteUrl(value, 'http://127.0.0.1:3000/catalog.js'),
     loadLibrary: async () => { libraryRequests++; throw new Error('Unexpected download'); },
     probeGraphics, watchStartup, document, MutationObserver: Observer,
     console: { warn() {}, error() {} }, window: { addEventListener() {} },

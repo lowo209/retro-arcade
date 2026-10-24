@@ -1,11 +1,15 @@
-import { IS_PREVIEW } from './deployment.js';
+import { IS_PREVIEW, HOSTED_LIBRARY_URL, EMULATOR_DATA_URL } from './deployment.js';
 export { IS_PREVIEW, FEEDBACK_URL } from './deployment.js';
+export const IS_HOSTED = !!HOSTED_LIBRARY_URL;
 
 // Resolve from this module so both the local root and /repository/ Pages URLs work.
 export const siteUrl = (path, moduleUrl = import.meta.url) => {
   const url = new URL(path.replace(/^\/+/, ''), new URL('./', moduleUrl));
   return url.pathname + url.search + url.hash;
 };
+export const runtimeUrl = path => EMULATOR_DATA_URL
+  ? new URL(path, EMULATOR_DATA_URL).href
+  : siteUrl(`vendor/emulatorjs/data/${path}`);
 
 export const GAMES = [
   { id: 'umk3', title: 'Ultimate Mortal Kombat 3', short: 'UMK3', platform: 'Arcade', year: '1995', genre: 'Fighting', players: '1–2 players', cover: 'umk3', description: 'Finish what you started. The ultimate showdown from the golden age of the arcade.', long: 'The original Midway arcade game, running locally through EmulatorJS and MAME 2003 Plus. Insert a coin, choose your fighter, and take on the CPU or a friend.', engine: 'EmulatorJS · MAME 2003 Plus', missing: 'Add a complete UMK3 rev 1.2 set compatible with MAME 2003 Plus. Run the supplied setup script to package the loose files by checksum.', filename: 'private/roms/umk3/umk3.zip' },
@@ -65,7 +69,7 @@ export async function loadLibrary() {
       requirements: [], romUrl: null, biosUrl: null,
       reason: 'This public interface preview does not include game playback.' })),
   };
-  const response = await fetch(siteUrl('api/library'), { cache: 'no-store', signal: AbortSignal.timeout(10000) });
-  if (!response.ok) throw new Error('The local server could not check your files.');
+  const response = await fetch(siteUrl(HOSTED_LIBRARY_URL || 'api/library'), { cache: 'no-store', signal: AbortSignal.timeout(10000) });
+  if (!response.ok) throw new Error(IS_HOSTED ? 'The tester library is temporarily unavailable. Please retry.' : 'The local server could not check your files.');
   return response.json();
 }

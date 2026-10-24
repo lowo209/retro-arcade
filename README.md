@@ -2,6 +2,8 @@
 
 **Tester release:** the GitHub Pages build is an interface preview with the 3D cabinet, collection, search, filters, favorites and control guides. Game playback remains in the local build. See [TESTER-RELEASE.md](docs/TESTER-RELEASE.md) for preview/build/deployment steps.
 
+**Playable hosting preparation:** GitHub Pages plus Cloudflare R2 has been selected for the seven-game tester release. Billing activation, upload and remote verification are pending. [R2-HOSTING.md](docs/R2-HOSTING.md) documents the 4.81 GB release, upload tool, free-usage assumptions and activation checks. Pages stays an interface preview until a verified hosted manifest is installed.
+
 [Open the public tester preview](https://lowo209.github.io/retro-arcade/) · [Send tester feedback](https://github.com/lowo209/retro-arcade/issues/new?template=tester-feedback.yml)
 
 If every game fails with a WebGL/GLctx error in Firefox, see the local [browser graphics guide](public/guides/browser.html). The player now checks graphics availability before loading a disc and reports caught emulator startup errors.

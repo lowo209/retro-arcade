@@ -1,4 +1,4 @@
-import { GAMES, escapeHTML as esc, loadLibrary, IS_PREVIEW, FEEDBACK_URL, siteUrl } from './catalog.js';
+import { GAMES, escapeHTML as esc, loadLibrary, IS_PREVIEW, IS_HOSTED, FEEDBACK_URL, siteUrl } from './catalog.js';
 
 const grid = document.querySelector('#game-grid');
 const feedback = document.querySelector('#library-feedback');
@@ -26,8 +26,8 @@ function render(animate = true) {
     const state = library?.games.find(s => s.id === game.id);
     const ready = state?.ready, favorite = favorites.has(game.id);
     const cover = state?.coverUrl || siteUrl(`assets/${game.cover}.svg`);
-    const action = IS_PREVIEW ? 'View game details' : ready ? 'Open player' : game.experimental ? 'Explore the project' : 'View setup';
-    const badge = IS_PREVIEW ? 'Interface preview' : game.experimental ? 'Experimental' : ready ? 'Ready to launch' : library ? 'Setup needed' : 'Checking files';
+    const action = IS_PREVIEW ? 'View game details' : ready ? 'Open player' : IS_HOSTED ? 'View game details' : game.experimental ? 'Explore the project' : 'View setup';
+    const badge = IS_PREVIEW ? 'Interface preview' : IS_HOSTED && game.experimental ? 'Coming later' : game.experimental ? 'Experimental' : ready ? 'Ready to launch' : library ? IS_HOSTED ? 'Unavailable' : 'Setup needed' : 'Loading';
     const gameUrl = siteUrl(`game.html?id=${game.id}`);
     return `
       <article class="game-card" data-game="${game.id}" style="--card-index:${index}">
@@ -50,7 +50,7 @@ function render(animate = true) {
           <p>${game.description}</p>
           <div class="card-bottom">
             <span class="status-badge ${game.experimental ? 'experimental' : ready ? 'ready' : ''}"><i></i>${badge}</span>
-            <a class="card-play ${ready ? 'available' : ''}" href="${gameUrl}">${IS_PREVIEW ? 'View' : ready ? 'Play' : game.experimental ? 'Explore' : 'Set up'} <span>${ready ? '▶' : '↗'}</span></a>
+            <a class="card-play ${ready ? 'available' : ''}" href="${gameUrl}">${IS_PREVIEW ? 'View' : ready ? 'Play' : IS_HOSTED ? 'Details' : game.experimental ? 'Explore' : 'Set up'} <span>${ready ? '▶' : '↗'}</span></a>
           </div>
         </div>
       </article>`;
@@ -105,12 +105,13 @@ grid.addEventListener('click', event => {
 
 async function refresh() {
   const status = document.querySelector('#library-status');
-  status.textContent = IS_PREVIEW ? 'Loading the preview…' : 'Checking local files…';
+  status.textContent = IS_PREVIEW ? 'Loading the preview…' : IS_HOSTED ? 'Loading the tester library…' : 'Checking local files…';
   try {
     library = await loadLibrary();
     if (library.preview) { status.textContent = `Interface preview · ${GAMES.length} classics`; render(); return; }
     const ready = library.games.filter(g => g.ready && !g.experimental).length;
     status.textContent = `${ready} ready to launch · ${GAMES.length} classics`;
+    if (IS_HOSTED) { render(); return; }
     const bios = document.querySelector('#bios-check');
     bios.textContent = library.bios ? `PS1 BIOS installed · ${library.biosName}` : 'PS1 BIOS needed · scph1001.bin, scph5501.bin or scph5502.bin';
     bios.classList.toggle('installed', library.bios);
@@ -127,7 +128,7 @@ async function refresh() {
       const note = document.querySelector(`[data-file-note="${id}"]`);
       if (note) note.textContent = text;
     }
-  } catch { status.textContent = 'Library check failed — is npm start running?'; }
+  } catch { status.textContent = IS_HOSTED ? 'Library unavailable — please reload and retry.' : 'Library check failed — is npm start running?'; }
   render();
 }
 if (IS_PREVIEW) {
@@ -144,6 +145,19 @@ if (IS_PREVIEW) {
   document.querySelectorAll('a[href$="#setup"]').forEach(link => link.textContent = 'Tester guide');
   document.querySelector('#about-dialog').innerHTML = '<button class="dialog-close" aria-label="Close about dialog">×</button><p class="eyebrow">EARLY ACCESS / INTERFACE PREVIEW</p><h2>Help build your next arcade.</h2><p>Test the interactive cabinet, library, favorites, search, responsive layout and game-detail pages. Game playback is available in the separate local build.</p><p>This public preview contains original library illustrations and website code. It includes no commercial game discs, firmware or private cover scans. Game and platform names belong to their respective owners. The project is independent of the publishers.</p><p>Favorites are kept in this browser. There is no account, analytics or automatic feedback upload.</p>';
 }
+if (IS_HOSTED) {
+  document.title = 'Retro Arcade — Playable tester release';
+  document.querySelector('.local-indicator').innerHTML = '<i></i> PLAYABLE TEST';
+  document.querySelector('.hero-notes').innerHTML = '<span>◉ Original games</span><span>⌁ Same-device multiplayer</span><span>↗ Play in your browser</span>';
+  document.querySelector('.file-guide').remove();
+  const notice = document.createElement('aside'); notice.className = 'preview-notice';
+  notice.innerHTML = '<strong>PLAYABLE TEST</strong><span>Choose a game and launch. First PS1 downloads are around 500–750 MB. GT4 is coming later.</span>';
+  document.querySelector('main').prepend(notice);
+  document.querySelector('#setup').innerHTML = `<div class="setup-intro"><span class="small-icon">↗</span><div><p class="eyebrow muted">READY FOR A ROUND?</p><h2 id="setup-title">Pick a game.<br>Press play.</h2><p>The game loads from this link and runs in your browser. A desktop browser with hardware acceleration is recommended.</p><a class="button secondary" href="${esc(FEEDBACK_URL)}" target="_blank" rel="noopener noreferrer">Send tester feedback ↗</a></div></div><div class="setup-steps"><article><span>01</span><div><h3>Let it load</h3><p>PS1 games are large downloads. Keep the player open while the first download finishes.</p></div></article><article><span>02</span><div><h3>Bring a friend</h3><p>Two-player games use the same device. Choose Player 1 and Player 2 controls, then the game’s two-player mode. Online multiplayer is not included.</p></div></article><article><span>03</span><div><h3>Keep your progress</h3><p>Saves stay in this browser on this website. Export backups before clearing site data. UMK3 save states are unavailable.</p></div></article></div>`;
+  document.querySelectorAll('a[href$="#setup"]').forEach(link => link.textContent = 'Tester guide');
+  document.querySelector('#about-dialog').innerHTML = `<button class="dialog-close" aria-label="Close about dialog">×</button><p class="eyebrow">EARLY ACCESS / PLAYABLE TEST</p><h2>One more round?</h2><p>Seven original arcade and PlayStation games are available for testing. Gran Turismo 4 needs a separate browser build and is coming later.</p><p>Game files download from Cloudflare R2 and run on your device through EmulatorJS. Favorites, saves and controls stay in this browser. There is no account or automatic feedback upload.</p><p>The project is independent of the game publishers. Third-party names, artwork and software retain their respective ownership and licenses. <a href="${siteUrl('software.html')}">Emulator licenses and source ↗</a></p>`;
+}
+
 document.querySelector('#search').addEventListener('input', () => render());
 document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => {
   filter = button.dataset.filter;

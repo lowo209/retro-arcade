@@ -1,4 +1,4 @@
-import { GAMES, controlsForGame, escapeHTML as esc, loadLibrary, FEEDBACK_URL, siteUrl } from './catalog.js';
+import { GAMES, controlsForGame, escapeHTML as esc, loadLibrary, FEEDBACK_URL, IS_HOSTED, siteUrl } from './catalog.js';
 const id = new URLSearchParams(location.search).get('id');
 const game = GAMES.find(g => g.id === id);
 const content = document.querySelector('#game-content');
@@ -32,6 +32,7 @@ function controlHint(player) {
 function launchScreen() {
   const ready = state.ready;
   const alternate = id === 'gt2' && state.alternate;
+  if (IS_HOSTED) return `<div class="launch-screen"><span class="launch-symbol" aria-hidden="true">${ready ? '◈' : '⌁'}</span><h2>${ready ? 'Ready for another round?' : 'Coming later.'}</h2><p>${esc(ready ? 'Launch the game, then click inside the player to use your keyboard. First downloads can take a few minutes.' : state.reason)}</p><div class="launch-actions">${ready ? '<button class="button primary" id="launch">Launch game <span>▶</span></button>' : `<a class="button secondary" href="${siteUrl('#library')}">Back to library ↗</a>`}${alternate?.ready ? '<button class="button secondary" id="launch-alternate">Try Simulation disc ↗</button>' : ''}</div>${alternate?.ready ? '<p class="launch-note">The main launch uses the European Arcade disc. The US Simulation disc has its own saves.</p>' : ''}<p class="launch-note">${ready ? `Runs on your device · ${Math.ceil((state.downloadBytes || 0) / 1000000)} MB game download · No installation` : 'This game is not part of the playable tester release.'}</p></div>`;
   return `<div class="launch-screen"><span class="launch-symbol" aria-hidden="true">${ready ? '◈' : game.experimental ? '⌁' : '↯'}</span><h2>${ready ? 'Ready for another round?' : game.experimental ? 'The next lap is experimental.' : 'Your classic needs a little setup.'}</h2><p>${esc(ready ? game.experimental ? 'A local PS2 Web Recomp build was found. This build still needs gameplay, sound, controller and performance testing.' : 'The local emulator and game files are in place. Launch the original game, then click inside the player to use your keyboard.' : state.reason)}</p><div class="launch-actions">${ready ? `<button class="button primary" id="launch">${game.experimental ? 'Try experimental build' : 'Launch game'} <span>▶</span></button>` : '<a class="button secondary" href="#game-setup">View setup instructions <span>↓</span></a>'}${alternate?.ready ? '<button class="button secondary" id="launch-alternate">Try Simulation disc ↗</button>' : ''}</div>${alternate ? `<p class="launch-note">Simulation disc detected${alternate.ready ? '' : ' · ' + esc(alternate.reason.replace(/\.$/, ''))}. ${state.ready ? 'The main launch uses the European Arcade disc.' : 'Arcade Mode requires its own disc.'}</p>` : ''}<p class="launch-note">${game.experimental ? 'Requires WebGPU and cross-origin isolation.' : 'Real emulation · Local files · No external application'}</p></div>`;
 }
 function requirementsList(requirements = []) {
@@ -64,7 +65,22 @@ function render() {
     try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.querySelector('#player-stage').requestFullscreen(); }
     catch { document.querySelector('#player-message').textContent = 'Fullscreen was not available. Try the fullscreen button inside the emulator.'; }
   });
-  document.querySelector('#recheck').addEventListener('click', () => location.reload());
+  document.querySelector('#recheck')?.addEventListener('click', () => location.reload());
+  if (IS_HOSTED) {
+    document.querySelector('.local-indicator').innerHTML = '<i></i> PLAYABLE TEST';
+    document.querySelector('nav a[href$="#setup"]').textContent = 'Tester guide';
+    document.querySelector('#game-setup').remove();
+    document.querySelector('.player-topbar > span').innerHTML = '<i class="live-dot"></i> ORIGINAL GAME / TESTER SESSION';
+    const description = document.querySelector('.player-details .detail-section > p');
+    description.textContent = game.experimental ? 'Gran Turismo 4 needs a separate browser build. It is not available in this tester release.' : game.long.replace(/The supplied /g, 'The ').replace(/Your supplied US PlayStation disc is installed locally\./, 'This is the US PlayStation release.').replace(/running locally/g, 'running in your browser');
+    const report = document.createElement('p');
+    report.innerHTML = `<a href="${esc(FEEDBACK_URL)}" target="_blank" rel="noopener noreferrer">Report a problem or share feedback ↗</a> · <a href="${siteUrl('software.html')}">Emulator licenses and source</a>`;
+    description.after(report);
+    if (!state.ready) {
+      document.querySelector('.game-heading .status-badge').innerHTML = '<i></i>Coming later';
+      document.querySelector('#player-status').textContent = 'Unavailable in this release';
+    }
+  }
   updateGamepads();
 }
 function launch(variant = 'primary') {
@@ -74,15 +90,15 @@ function launch(variant = 'primary') {
   const frame = document.createElement('iframe');
   frame.title = `${game.title}${variant === 'simulation' ? ' — Simulation Mode' : ''}`;
   frame.allow = 'autoplay; fullscreen; gamepad'; frame.allowFullscreen = true;
-  frame.src = game.experimental ? state.playerUrl : `/frame.html?id=${id}${variant === 'simulation' ? '&variant=simulation' : ''}`;
+  frame.src = game.experimental ? state.playerUrl : siteUrl(`frame.html?id=${id}${variant === 'simulation' ? '&variant=simulation' : ''}`);
   const exit = document.createElement('button');
   exit.className = 'fullscreen-exit'; exit.textContent = '⛶ Exit fullscreen';
   exit.addEventListener('click', async () => { try { await document.exitFullscreen(); } catch { document.querySelector('#player-message').textContent = 'Use Esc or the browser’s fullscreen control to exit.'; } });
   document.querySelector('#player-stage').replaceChildren(frame, exit);
-  document.querySelector('#player-status').textContent = 'Loading local runtime…';
+  document.querySelector('#player-status').textContent = IS_HOSTED ? 'Downloading game data…' : 'Loading local runtime…';
   document.querySelector('#session-tools').innerHTML = '<button class="text-button" id="restart-session">Restart session ↻</button>';
   document.querySelector('#restart-session').addEventListener('click', () => { frame.remove(); location.reload(); });
-  startupTimer = setTimeout(() => { document.querySelector('#player-message').textContent = 'Still loading? Check the message inside the player. If it is blank, check the ROM set and local core files, then restart the session. First boots can take a minute.'; }, 90000);
+  startupTimer = setTimeout(() => { document.querySelector('#player-message').textContent = IS_HOSTED ? 'First downloads can take several minutes. Keep this player open. If loading fails, restart the session and send feedback with the error shown.' : 'Still loading? Check the message inside the player. If it is blank, check the ROM set and local core files, then restart the session. First boots can take a minute.'; }, 90000);
   if (game.experimental) frame.addEventListener('load', () => { document.querySelector('#player-status').textContent = 'Experimental page loaded · gameplay unverified'; clearTimeout(startupTimer); });
 }
 window.addEventListener('message', event => {

@@ -1,5 +1,11 @@
 # Verification log
 
+## 24 October 2026 — Playable tester rollout request
+
+- The user reports that audio and multiplayer work. This is user-confirmed; specific titles, controller hardware and audio outputs were not named. Earlier per-game agent verification records remain separate.
+- The user confirmed permission to distribute the supplied game archives, PS1 firmware and cover images for the tester release. They requested free hosting and have no domain. No game assets have been uploaded or exposed by this status update.
+- Existing PS1/arcade archives total 4,665,635,629 bytes; the installed emulator runtime is 27,784,485 bytes and cover scans total 2,897,995 bytes. GT4 still has no compiled browser build. GitHub Pages' 1 GB site limit excludes putting this full catalogue in the existing preview deployment.
+
 ## 24 October 2026 — GitHub interface-preview release
 
 - The user confirmed that restarting Windows restored Firefox gameplay. Its report showed device reset/removal and older cached driver information beside the newer WebGPU driver. No browser/security settings were forced.
@@ -133,3 +139,19 @@ The actual pinned PCSX core's embedded `core.json` advertises CUE/BIN and PBP, b
 The actual upstream README, web shell, build script and range-server source were inspected. Upstream describes a PAL GT4 demonstration; this US executable requires its own recompilation. The workstation reports WSL is not installed, and CMake, Ninja and clang were not on PATH. No toolchain installation or OS change was performed. The documented WSL2 route is an inference from upstream's Linux workflow, not a tested port on this machine.
 
 The integration serves a user's future browser build privately with range streaming and isolation headers. That route does not establish gameplay compatibility. GT4 keyboard/gamepads, audio, speed, saves and local multiplayer remain **unverified**. Full steps and limitations are in [GT4.md](GT4.md).
+
+## 24 October 2026 — R2 playable-release preparation
+
+- The owner selected GitHub Pages plus Cloudflare R2 after reviewing the expected free usage and overage billing. The Cloudflare dashboard showed $0 due now and $0/month plus additional usage. Owner billing activation is still in progress; no bucket, public R2 URL, credentials or upload has been created by the agent.
+- Prepared a local, ignored release plan: 85 objects, 4,805,262,832 bytes (about 4.81 GB), including the eight installed ROM archives (GT2 has two discs), verified PS1 BIOS, eight covers, pinned runtime, licenses and source archives. No GT4 ISO, private config, unrelated source directories or credentials enter the plan. Every input has a SHA-256 hash. This placeholder plan must be regenerated with the real bucket URL before publication.
+- Added a static hosted catalogue/player build under the repository prefix. GitHub Pages retains its interface-preview behavior until a remotely verified public manifest is deliberately installed. Hosted playback downloads from R2; the local server keeps its loopback bind and private-file boundary rules. GT4 stays unavailable; same-device multiplayer and browser-local saves are described accurately.
+- Added a loopback-only uploader using bucket-scoped S3 keys entered directly into a local password form, held only in memory; multipart uploads, skip-on-matching-object and collision refusal are implemented. Public verification checks remote lengths, checksum metadata, CORS, MIME types, byte ranges and initial bytes. Actual R2 uploads and browser playback remain pending activation.
+- Eighteen automated checks pass across the local HTTP boundary, controls, cabinet fallback, startup diagnostics, interface preview, hosted manifest/build, and public-field sanitization tests. The local server HTTP test needed sandbox loopback permission, then passed. JavaScript syntax and Python uploader compilation pass. Browser regression: original UMK3 reaches the emulator-running state using the new default runtime URL resolver; no new gameplay, audio or multiplayer claim follows from this boot check.
+- Separate-origin integration QA used loopback asset port 4175 and Pages-style website port 4174 with the `/retro-arcade/` prefix, the generated iframe CSP and a local-only manifest fixture. UMK3 and NFS both reached emulator-running state; the NFS original intro movie rendered. This checks external-runtime paths, decompression workers and BIOS/game loading without cross-origin isolation; it is not a Cloudflare deployment test. The fixture is ignored and cannot activate the Pages workflow. The uploader's password fields and Host/Origin/CSRF rejection passed a loopback smoke test with dummy data; no upload started.
+
+## 24 October 2026 — R2 activation and upload
+
+- Owner confirmed R2 activation and card setup. Created the empty Standard bucket `retro-arcade-testers` in Eastern Europe, enabled its public development URL, and saved GET/HEAD/Range CORS rules for `https://lowo209.github.io` and the loopback test origin. No Workers paid plan or domain was purchased.
+- Owner explicitly approved creating a 24-hour Object Read & Write user key limited to this bucket and passing its S3 values directly into the loopback uploader. Values were kept in memory, redacted from observations, cleared from the automation variables after transfer, and excluded from chat, disk, source and Git. Cloudflare confirmed Oct 24–25 validity. Upload began using the prepared 85-object allowlist.
+- Public R2 responses expose ETags but omit custom S3 metadata. Added ETag verification matching the uploader's 32 MiB multipart chunks, while authenticated post-upload HEAD checks continue to verify SHA-256 metadata. Unit checks cover a known single-PUT hash and Cloudflare's documented multipart example.
+- Real R2 browser test: UMK3 reached the running state. The next game's preflight exposed reuse of a cached classic-script response without CORS headers. Required-file HEAD checks now use `cache: no-store`, and errors identify the failed download for tester reports. The corrected PS1 test proceeds to the game download. Full upload, full verification, Pages deployment and final browser checks are still pending at this checkpoint.

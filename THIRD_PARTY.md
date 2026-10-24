@@ -1,5 +1,16 @@
 # Third-party software and notices
 
+## R2 tester release preparation
+
+The operator authorized distribution of the selected game files, firmware and
+cover artwork for testing. These assets remain excluded from Git and source
+exports. The separate R2 release plan includes the installed emulator runtime,
+unminified modified frontend sources, original licenses, extracted core notices,
+and upstream source archives with version/commit provenance. The hosted website
+links to those notices and source downloads. This preparation does not change
+ownership or licensing of games, firmware, artwork or third-party software.
+See [R2-HOSTING.md](docs/R2-HOSTING.md) for the selected deployment procedure.
+
 ## EmulatorJS 4.2.3
 
 [Official repository](https://github.com/EmulatorJS/EmulatorJS), [4.2.3 release](https://github.com/EmulatorJS/EmulatorJS/releases/tag/v4.2.3), [license](https://github.com/EmulatorJS/EmulatorJS/blob/v4.2.3/LICENSE).
