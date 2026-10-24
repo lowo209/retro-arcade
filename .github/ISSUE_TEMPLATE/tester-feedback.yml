@@ -1,17 +1,37 @@
 name: Tester feedback
-description: Report an interface problem or suggest an improvement.
+description: Report a website or game problem, or suggest an improvement.
 title: '[Tester feedback]: '
 body:
   - type: markdown
     attributes:
-      value: 'This release previews the cabinet, library and game pages. Commercial game playback is outside this public preview.'
+      value: 'Test available games from the public library. Multiplayer uses the same device; GT4 is not available yet. Include the player error message if a download or launch fails.'
+  - type: dropdown
+    id: area
+    attributes:
+      label: What were you testing?
+      options:
+        - Website, library or cabinet
+        - Game download or startup
+        - Gameplay or performance
+        - Audio
+        - Same-device multiplayer
+        - Keyboard, gamepad or touch controls
+        - Saves or loading progress
+    validations:
+      required: true
   - type: input
     id: page
     attributes:
       label: Page
-      placeholder: Library, cabinet, or a game-detail page
+      placeholder: Library, cabinet, or the game page URL
     validations:
       required: true
+  - type: input
+    id: game
+    attributes:
+      label: Game and mode
+      description: For game problems, include the title and mode. For GT2, say Arcade or Simulation.
+      placeholder: Gran Turismo 2 Arcade, two-player race
   - type: input
     id: browser
     attributes:
@@ -23,6 +43,6 @@ body:
     id: feedback
     attributes:
       label: What happened or what would you improve?
-      description: Include steps, what you expected and any useful screenshots.
+      description: Include steps, what you expected, the controls you used, and any useful screenshots or player errors. For multiplayer, describe both players' controllers.
     validations:
       required: true
