@@ -51,7 +51,7 @@ export function buildPreview({ root = ROOT, basePath = '/', repository = 'lowo20
         .replace(/Checking (your )?local (game files|library)…/g, 'Loading the interface preview…');
       if (relative === 'index.html') data = data.replace(/<meta name="description" content="[^"]*">/, '<meta name="description" content="Explore the Retro Arcade interface preview: interactive 3D cabinet, eight-game library, search, filters and favorites. Game playback is available in the local build.">');
     }
-    if (relative === 'deployment.js') data = `export const IS_PREVIEW = true;\nexport const FEEDBACK_URL = ${JSON.stringify(`https://github.com/${repository}/issues/new?template=tester-feedback.yml`)};\n`;
+    if (relative === 'deployment.js') data = `export const IS_PREVIEW = true;\nexport const FEEDBACK_URL = ${JSON.stringify(`https://github.com/${repository}/issues/new?template=tester-feedback.yml`)};\nexport const HOSTED_LIBRARY_URL = '';\nexport const EMULATOR_DATA_URL = '';\n`;
     return [relative, data];
   });
   sources.push(['LICENSE', fs.readFileSync(path.join(root, 'LICENSE'), 'utf8')], ['.nojekyll', ''],

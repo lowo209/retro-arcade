@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "hosted": true,
+  "assetBase": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/",
+  "verifiedAt": "2026-10-24T20:59:58.576Z",
+  "runtime": true,
+  "bios": true,
+  "biosName": "scph1001.bin",
+  "games": [
+    {
+      "id": "umk3",
+      "ready": true,
+      "experimental": false,
+      "reason": "",
+      "core": "mame2003_plus",
+      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/umk3/umk3.zip",
+      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/umk3.png",
+      "downloadBytes": 22386949
+    },
+    {
+      "id": "nfs",
+      "ready": false,
+      "experimental": false,
+      "reason": "This game is uploading. Please check back shortly.",
+      "core": "pcsx_rearmed",
+      "region": "US",
+      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/nfs.png",
+      "downloadBytes": 733165836
+    },
+    {
+      "id": "gt2",
+      "ready": false,
+      "experimental": false,
+      "reason": "This game is uploading. Please check back shortly.",
+      "core": "pcsx_rearmed",
+      "region": "Europe",
+      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/gt2.png",
+      "downloadBytes": 667966219,
+      "alternate": {
+        "id": "gt2",
+        "ready": false,
+        "experimental": false,
+        "reason": "This game is uploading. Please check back shortly.",
+        "core": "pcsx_rearmed",
+        "region": "US",
+        "downloadBytes": 691850659,
+        "label": "Simulation Mode",
+        "warning": "This separate US Simulation disc has its own saves. The main launch uses the European Arcade disc."
+      }
+    },
+    {
+      "id": "gt4",
+      "ready": false,
+      "experimental": true,
+      "reason": "Gran Turismo 4 needs a separate browser build and is coming later.",
+      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/gt4.png"
+    },
+    {
+      "id": "re3",
+      "ready": false,
+      "experimental": false,
+      "reason": "This game is uploading. Please check back shortly.",
+      "core": "pcsx_rearmed",
+      "region": "US",
+      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/re3.png",
+      "downloadBytes": 722165547
+    },
+    {
+      "id": "ac3",
+      "ready": true,
+      "experimental": false,
+      "reason": "",
+      "core": "pcsx_rearmed",
+      "region": "Europe",
+      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/ac3/electrosphere.zip",
+      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin",
+      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/ac3.jpg",
+      "downloadBytes": 471000286
+    },
+    {
+      "id": "gits",
+      "ready": false,
+      "experimental": false,
+      "reason": "This game is uploading. Please check back shortly.",
+      "core": "pcsx_rearmed",
+      "region": "Europe",
+      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/gits.jpg",
+      "downloadBytes": 655620391
+    },
+    {
+      "id": "gpolice2",
+      "ready": false,
+      "experimental": false,
+      "reason": "This game is uploading. Please check back shortly.",
+      "core": "pcsx_rearmed",
+      "region": "Europe",
+      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/gpolice2.jpg",
+      "downloadBytes": 701479742
+    }
+  ]
+}

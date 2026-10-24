@@ -1,14 +1,16 @@
 # Retro Arcade
 
-**Tester release:** the GitHub Pages build is an interface preview with the 3D cabinet, collection, search, filters, favorites and control guides. Game playback remains in the local build. See [TESTER-RELEASE.md](docs/TESTER-RELEASE.md) for preview/build/deployment steps.
+**Playable tester release:** the GitHub Pages build includes the player, cabinet, collection, search, filters, favorites and control guides. Available games download from Cloudflare R2 and run in the browser. Check each game's current availability in the library; large game uploads are being enabled as they finish verification.
 
-[Open the public tester preview](https://lowo209.github.io/retro-arcade/) · [Send tester feedback](https://github.com/lowo209/retro-arcade/issues/new?template=tester-feedback.yml)
+**Hosting:** [R2-HOSTING.md](docs/R2-HOSTING.md) documents the 4.81 GB release, upload tool, free-usage assumptions and activation checks. Only games in the verified public manifest can launch. GT4 remains unavailable until its separate browser build is ready.
+
+[Open the public tester site](https://lowo209.github.io/retro-arcade/) · [Send tester feedback](https://github.com/lowo209/retro-arcade/issues/new?template=tester-feedback.yml)
 
 If every game fails with a WebGL/GLctx error in Firefox, see the local [browser graphics guide](public/guides/browser.html). The player now checks graphics availability before loading a disc and reports caught emulator startup errors.
 
 A private browser arcade with a charcoal and orange library, an interactive 3D hero cabinet, your supplied local covers, hover/focus card effects, favorites, search and filters, individual game pages, fullscreen, two keyboard layouts, gamepad detection, emulator controls and saves. Built with HTML, CSS, JavaScript, locally bundled Three.js and a small Node.js server. No framework, package installation, build step, CDN or native game launcher is required to run the installed site.
 
-For the requested **public, link-only site with no visitor installations**, see [PUBLIC-ARCADE.md](docs/PUBLIC-ARCADE.md). The current playable arcade is local; no private game data has been deployed publicly.
+For the **public, link-only site with no visitor installations**, see [R2-HOSTING.md](docs/R2-HOSTING.md). The local server and setup below remain available separately. Browser saves belong to their website address and browser profile; local saves do not automatically transfer to the public site.
 
 The hero controls and implementation are described in [CABINET.md](docs/CABINET.md). [CONTROLS.md](docs/CONTROLS.md) lists shared WASD profiles and how to reset older bindings. For GT4's developer tools, start with [BUILD-ENVIRONMENT.md](docs/BUILD-ENVIRONMENT.md).
 

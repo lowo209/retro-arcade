@@ -4,6 +4,7 @@
 /.local/
 /exports/
 /dist/
+/dist-playable/
 /node_modules/
 __pycache__/
 *.py[cod]
