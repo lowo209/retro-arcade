@@ -2,6 +2,8 @@
 
 **Tester release:** the GitHub Pages build is an interface preview with the 3D cabinet, collection, search, filters, favorites and control guides. Game playback remains in the local build. See [TESTER-RELEASE.md](docs/TESTER-RELEASE.md) for preview/build/deployment steps.
 
+[Open the public tester preview](https://lowo209.github.io/retro-arcade/) · [Send tester feedback](https://github.com/lowo209/retro-arcade/issues/new?template=tester-feedback.yml)
+
 If every game fails with a WebGL/GLctx error in Firefox, see the local [browser graphics guide](public/guides/browser.html). The player now checks graphics availability before loading a disc and reports caught emulator startup errors.
 
 A private browser arcade with a charcoal and orange library, an interactive 3D hero cabinet, your supplied local covers, hover/focus card effects, favorites, search and filters, individual game pages, fullscreen, two keyboard layouts, gamepad detection, emulator controls and saves. Built with HTML, CSS, JavaScript, locally bundled Three.js and a small Node.js server. No framework, package installation, build step, CDN or native game launcher is required to run the installed site.

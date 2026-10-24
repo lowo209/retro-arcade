@@ -1,5 +1,7 @@
 # Public interface preview
 
+Published 24 October 2026: **https://lowo209.github.io/retro-arcade/**. Source: [lowo209/retro-arcade](https://github.com/lowo209/retro-arcade). Feedback: [tester issue form](https://github.com/lowo209/retro-arcade/issues/new?template=tester-feedback.yml).
+
 The first public release previews the existing interface: the interactive 3D cabinet, eight-entry library, search, platform filters, favorites, responsive layout and game-detail/control pages. The visual redesign is deferred.
 
 Game playback belongs to the separate local arcade. The preview includes original SVG library illustrations in place of private cover scans. It contains no ROMs, discs, firmware, game-derived builds or EmulatorJS binaries. It makes no requests to the developer's local API or computer. Visitors need only a browser; no installation or game files are requested by this preview.
@@ -19,7 +21,7 @@ The builder has a fixed website-asset allowlist. It validates its inputs, reject
 
 ## GitHub publication
 
-The intended repository is `lowo209/retro-arcade`, using its default `main` branch. In repository Settings → Pages, choose GitHub Actions as the publishing source. The included workflow runs regression/source-boundary checks, builds the allowlisted `dist/`, and uploads only that folder as the Pages artifact. Only pushes to main or a manual run deploy; pull requests run checks without deployment permissions.
+The repository is `lowo209/retro-arcade`, using its default `main` branch. GitHub Actions is configured as the Pages publishing source. The included workflow runs regression/source-boundary checks, builds the allowlisted `dist/`, and uploads only that folder as the Pages artifact. Only pushes to main or a manual run deploy; pull requests run checks without deployment permissions.
 
 Testers use the repository's tester-feedback issue form. No feedback, accounts, analytics or device reports are collected automatically by the website. GitHub hosts the issue form and may require its own sign-in. Screenshots are supplied deliberately by testers.
 
