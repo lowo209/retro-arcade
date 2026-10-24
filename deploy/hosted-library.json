@@ -2,7 +2,7 @@
   "schema": 1,
   "hosted": true,
   "assetBase": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/",
-  "verifiedAt": "2026-10-24T21:07:55.415Z",
+  "verifiedAt": "2026-10-24T21:29:00.302Z",
   "runtime": true,
   "bios": true,
   "biosName": "scph1001.bin",
@@ -19,11 +19,13 @@
     },
     {
       "id": "nfs",
-      "ready": false,
+      "ready": true,
       "experimental": false,
-      "reason": "This game is uploading. Please check back shortly.",
+      "reason": "",
       "core": "pcsx_rearmed",
       "region": "US",
+      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/nfs/high-stakes.zip",
+      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin",
       "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/nfs.png",
       "downloadBytes": 733165836
     },
@@ -40,11 +42,13 @@
       "downloadBytes": 667966219,
       "alternate": {
         "id": "gt2",
-        "ready": false,
+        "ready": true,
         "experimental": false,
-        "reason": "This game is uploading. Please check back shortly.",
+        "reason": "",
         "core": "pcsx_rearmed",
         "region": "US",
+        "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/gt2/gt2-simulation.zip",
+        "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin",
         "downloadBytes": 691850659,
         "label": "Simulation Mode",
         "warning": "This separate US Simulation disc has its own saves. The main launch uses the European Arcade disc."
@@ -59,11 +63,13 @@
     },
     {
       "id": "re3",
-      "ready": false,
+      "ready": true,
       "experimental": false,
-      "reason": "This game is uploading. Please check back shortly.",
+      "reason": "",
       "core": "pcsx_rearmed",
       "region": "US",
+      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/re3/re3-nemesis.zip",
+      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin",
       "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/re3.png",
       "downloadBytes": 722165547
     },
@@ -93,11 +99,13 @@
     },
     {
       "id": "gpolice2",
-      "ready": false,
+      "ready": true,
       "experimental": false,
-      "reason": "This game is uploading. Please check back shortly.",
+      "reason": "",
       "core": "pcsx_rearmed",
       "region": "Europe",
+      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/gpolice2/weapons-of-justice.zip",
+      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin",
       "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/gpolice2.jpg",
       "downloadBytes": 701479742
     }

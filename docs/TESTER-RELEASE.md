@@ -1,9 +1,32 @@
 # Public tester releases
 
-The Pages workflow now supports a playable R2-backed release when
-`deploy/hosted-library.json` is present. See [R2-HOSTING.md](R2-HOSTING.md) for
-current hosting and verification steps. The interface-only release below is
-retained as the fallback when that verified manifest is absent.
+Open **[Retro Arcade](https://lowo209.github.io/retro-arcade/)** in a browser,
+choose an available game, and click **Launch game**. No installation is needed.
+Games and the emulator download from Cloudflare R2 and run on the visitor's
+device. First PlayStation downloads are roughly 500–750 MB, so allow a few
+minutes on slower connections. The library shows the current availability.
+
+The verified full release contains UMK3, Need for Speed: High Stakes, Gran
+Turismo 2 (Arcade and separate Simulation discs), Resident Evil 3, Ace Combat 3,
+Ghost in the Shell and G-Police: Weapons of Justice. All 85 hosted objects passed
+public integrity, CORS and download checks on 24 October 2026.
+
+Multiplayer uses two players on the same device. Click inside the running player
+before using its controls. Progress stays in that browser profile at this
+website address; use the emulator's export controls to keep a backup. UMK3 save
+states are unavailable with the installed core. GT4 remains unavailable because
+its separate browser build is not ready. The redesign is deferred.
+
+Report problems through the **[tester issue form](https://github.com/lowo209/retro-arcade/issues/new?template=tester-feedback.yml)**,
+including the game and mode, browser/device, steps and any error shown. The form
+may require GitHub sign-in. The website collects no feedback, accounts, analytics
+or device reports automatically.
+
+The Pages workflow selects the playable build when `deploy/hosted-library.json`
+is present. See [R2-HOSTING.md](R2-HOSTING.md) for hosting, verification and rollback
+steps. Games, firmware, covers and emulator binaries stay in R2; only website
+assets and public catalogue URLs enter Pages. The original interface preview
+below remains the fallback when the verified manifest is absent.
 
 ## Original interface preview
 
@@ -28,12 +51,12 @@ The builder has a fixed website-asset allowlist. It validates its inputs, reject
 
 ## GitHub publication
 
-The repository is `lowo209/retro-arcade`, using its default `main` branch. GitHub Actions is configured as the Pages publishing source. The included workflow runs regression/source-boundary checks, builds the allowlisted `dist/`, and uploads only that folder as the Pages artifact. Only pushes to main or a manual run deploy; pull requests run checks without deployment permissions.
+The repository is `lowo209/retro-arcade`, using its default `main` branch. GitHub Actions is configured as the Pages publishing source. The included workflow runs regression/source-boundary checks, builds the allowlisted `dist-playable/` (or fallback `dist/`), and uploads only that folder as the Pages artifact. Only pushes to main or a manual run deploy; pull requests run checks without deployment permissions.
 
 Testers use the repository's tester-feedback issue form. No feedback, accounts, analytics or device reports are collected automatically by the website. GitHub hosts the issue form and may require its own sign-in. Screenshots are supplied deliberately by testers.
 
-Source publication uses the source-only export allowlist, including `.github/`. Never upload the workspace or `private/` wholesale. The source-only version retains the local arcade code so the owner can develop and test it privately; only the static interface preview is deployed.
+Source publication uses the source-only export allowlist, including `.github/` and the public `deploy/` manifest. Never upload the workspace or `private/` wholesale. The source-only version retains the local arcade code so the owner can develop and test it privately; the static hosted player is deployed separately from its R2 assets.
 
-GitHub Pages serves static files; the current Node server and private game mounts cannot run there. Link-only commercial-game playback is a later release requiring a suitable hosting design and authorized game/firmware distribution. GT4 additionally needs a working build for the supplied disc edition. See [PUBLIC-ARCADE.md](PUBLIC-ARCADE.md).
+GitHub Pages serves static files; the local Node server and private mounts do not run there. The owner confirmed distribution permission for the tester assets, which the hosted player loads from the separate public R2 bucket. GT4 additionally needs a working build for the supplied disc edition. See [R2-HOSTING.md](R2-HOSTING.md) for the selected deployment and [PUBLIC-ARCADE.md](PUBLIC-ARCADE.md) for the earlier hosting assessment.
 
 References: [GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages), [publishing sources](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).

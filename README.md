@@ -1,6 +1,6 @@
 # Retro Arcade
 
-**Playable tester release:** the GitHub Pages build includes the player, cabinet, collection, search, filters, favorites and control guides. Available games download from Cloudflare R2 and run in the browser. Check each game's current availability in the library; large game uploads are being enabled as they finish verification.
+**Playable tester release:** seven games are available from the public link: UMK3, Need for Speed: High Stakes, Gran Turismo 2, Resident Evil 3, Ace Combat 3, Ghost in the Shell and G-Police: Weapons of Justice. GT2 includes separate Arcade and Simulation launches. Games download from Cloudflare R2 and run in the browser; the cabinet, search, filters, favorites and control guides are included.
 
 **Hosting:** [R2-HOSTING.md](docs/R2-HOSTING.md) documents the 4.81 GB release, upload tool, free-usage assumptions and activation checks. Only games in the verified public manifest can launch. GT4 remains unavailable until its separate browser build is ready.
 
@@ -37,7 +37,7 @@ Use that exact address and port every time so browser saves stay in the same sto
 
 ## Current game status
 
-Readiness in the interface is computed from the local files on every visit. It is **not** a claim that all game features have been tested. See [the verification log](docs/VERIFICATION.md) for actual results.
+Local readiness is computed from installed files on every visit. The public site uses its remotely verified release manifest. Readiness is **not** a claim that all game features have been tested. See [the verification log](docs/VERIFICATION.md) for actual results.
 
 | Game | Integration | Supplied files and remaining requirements |
 | --- | --- | --- |
@@ -117,7 +117,7 @@ npm run check
 npm run export-source
 ```
 
-The export command creates a source-only folder under ignored `exports/` using a fixed allowlist. It refuses symlinks and game/binary extensions. Review that folder before publishing source. No repository has been committed, pushed or published by setup. `.gitignore` excludes private games, BIOS, vendor dependencies, saves and generated artifacts, with extension rules as an extra safeguard. Do not force-add those files. Before any GitHub push, run `npm run check` and inspect `git status --short` / staged filenames.
+The export command creates a source-only folder under ignored `exports/` using a fixed allowlist, including the public deployment manifest when present. It refuses symlinks and game/binary extensions. Review that folder before publishing source. The setup command itself never commits, pushes or publishes. `.gitignore` excludes private games, BIOS, vendor dependencies, saves and generated artifacts, with extension rules as an extra safeguard. Do not force-add those files. Before any GitHub push, run `npm run check` and inspect `git status --short` / staged filenames.
 
 The local server binds only to **127.0.0.1**, rejects foreign Host headers, and uses no telemetry or third-party network assets. Keep it local; do not expose game mounts to the Internet or publish a built private directory.
 

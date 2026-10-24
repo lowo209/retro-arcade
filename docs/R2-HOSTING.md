@@ -57,7 +57,9 @@ Official references: [pricing](https://developers.cloudflare.com/r2/pricing/),
 The owner creates an R2 S3 API key with **Object Read & Write**, limited to this
 bucket. The owner approves credential creation in Cloudflare. Do not use an
 account-wide administrative token, paste keys into chat, put them in a command
-line or commit them. Revoke the upload key after upload and verification.
+line or commit them. Use a short expiry or revoke the upload key after upload
+and verification. This release uses a bucket-only key expiring after 24 hours;
+stop the local uploader after verification to release its in-memory credentials.
 
 `scripts/upload-r2.py` provides a loopback-only form for entering the S3 Access
 Key ID and Secret Access Key directly. It holds credentials only in memory, uses
@@ -115,7 +117,8 @@ The full release replaces that manifest after all 85 objects pass checks.
 
 To preview the playable output locally, set `PREVIEW_DIRECTORY=dist-playable` and
 `PREVIEW_PORT=4174`, then run `npm run preview`. The project prefix is read from
-the build metadata. The original local arcade remains on port 3000.
+the build metadata. Start the separate original local arcade with `npm start`
+on port 3000 when needed; public playback does not depend on it running.
 
 ## Updates and rollback
 
