@@ -1,4 +1,11 @@
-# Public interface preview
+# Public tester releases
+
+The Pages workflow now supports a playable R2-backed release when
+`deploy/hosted-library.json` is present. See [R2-HOSTING.md](R2-HOSTING.md) for
+current hosting and verification steps. The interface-only release below is
+retained as the fallback when that verified manifest is absent.
+
+## Original interface preview
 
 Published 24 October 2026: **https://lowo209.github.io/retro-arcade/**. Source: [lowo209/retro-arcade](https://github.com/lowo209/retro-arcade). Feedback: [tester issue form](https://github.com/lowo209/retro-arcade/issues/new?template=tester-feedback.yml).
 

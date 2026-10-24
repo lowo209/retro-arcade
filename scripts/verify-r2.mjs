@@ -4,8 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { validateManifest } from './build-hosted.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export async function verifyR2({ root = ROOT, request = fetch } = {}) {
-  const release = path.join(root, '.local/r2-release');
+export async function verifyR2({ root = ROOT, request = fetch, releaseDirectory = '.local/r2-release' } = {}) {
+  const release = path.resolve(root, releaseDirectory);
+  if (!release.startsWith(path.resolve(root, '.local') + path.sep)) throw new Error('Verification reports must stay in the local release directory.');
   const plan = JSON.parse(fs.readFileSync(path.join(release, 'upload-plan.json'), 'utf8'));
   const manifest = JSON.parse(fs.readFileSync(path.join(release, 'library.pending.json'), 'utf8'));
   const origin = 'https://lowo209.github.io';

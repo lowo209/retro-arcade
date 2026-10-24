@@ -108,6 +108,11 @@ or local paths. `npm run build:pages` then emits `dist-playable/`; without that
 file it emits the existing interface preview in `dist/`. The Pages workflow uses
 the builder's output directory. Game binaries remain outside Git and Pages.
 
+A staged release may include only completed, verified game uploads. Games still
+uploading have `ready: false`, no download URL, and an explanatory message; every
+runtime, source, firmware and cover prerequisite must still pass verification.
+The full release replaces that manifest after all 85 objects pass checks.
+
 To preview the playable output locally, set `PREVIEW_DIRECTORY=dist-playable` and
 `PREVIEW_PORT=4174`, then run `npm run preview`. The project prefix is read from
 the build metadata. The original local arcade remains on port 3000.
