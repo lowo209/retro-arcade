@@ -1,19 +1,22 @@
 import * as THREE from './lib/three/three.module.min.js';
 
-// One scene, no external models/textures, and no continuously running idle loop.
-export function mountCabinet(host) {
-  const stage = host.querySelector('.cabinet-viewport');
+// A single on-demand scene. The real website is projected over the monitor only
+// once the camera is square to the glass; no DOM is copied into a canvas texture.
+export function initArcadeCabinet(host, options = {}) {
+  const stage = host.querySelector('.cabinet-viewport') || host;
   const status = host.querySelector('[data-cabinet-status]');
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const fine = matchMedia('(hover: hover) and (pointer: fine)');
   const events = new AbortController();
-  const listen = (target, type, handler, options = {}) => target.addEventListener(type, handler, { ...options, signal: events.signal });
+  const listen = (target, type, handler, options = {}) => target?.addEventListener?.(type, handler, { ...options, signal: events.signal });
   const resources = new Set();
   const keep = resource => { resources.add(resource); return resource; };
   let renderer, touchStick, resizeObserver, intersectionObserver, disposed = false;
+  let screenObject, unavailable = false, phase = 'attract', progress = 0, transition = null, screenMode = 'idle';
+  let width = 1, height = 1;
   let visible = true, frame = 0, lastTime = 0, hovered = null, active = null;
   let bootAt = null, powered = false, textureFrame = -1, message = '', messageUntil = 0;
-  let zoom = false, focusControl = null, joystickX = 0, joystickY = 0;
+  let focusControl = null, joystickX = 0, joystickY = 0;
   const targetRotation = new THREE.Vector2();
   const pointer = new THREE.Vector2();
   const ray = new THREE.Raycaster();
@@ -24,10 +27,65 @@ export function mountCabinet(host) {
   const cabinet = new THREE.Group();
   scene.add(cabinet);
   const camera = new THREE.PerspectiveCamera(31, 1, .1, 40);
-  const cameraHome = new THREE.Vector3(3.35, 2.6, 7.3);
+  const cameraHome = new THREE.Vector3(3.1, 2.25, 7.65);
   camera.position.copy(cameraHome);
   const viewTarget = new THREE.Vector3(0, -.04, 0);
+  const homeTarget = viewTarget.clone();
   camera.lookAt(viewTarget);
+
+  function dimensions() {
+    const bounds = stage.getBoundingClientRect?.();
+    width = Math.max(1, bounds?.width || stage.clientWidth || 1024);
+    height = Math.max(1, bounds?.height || stage.clientHeight || 768);
+  }
+  function cameraState() {
+    let corners;
+    if (screenObject && !unavailable) {
+      screenObject.updateWorldMatrix(true, false);
+      corners = [[-.59,.365],[.59,.365],[.59,-.365],[-.59,-.365]].map(([x,y]) => {
+        const point = screenObject.localToWorld(new THREE.Vector3(x,y,0)).project(camera);
+        return { x:(point.x+1)*width/2, y:(1-point.y)*height/2 };
+      });
+    } else {
+      corners = [{x:width*.04,y:height*.055},{x:width*.96,y:height*.055},{x:width*.96,y:height*.945},{x:width*.04,y:height*.945}];
+    }
+    const left = Math.min(...corners.map(point => point.x)), top = Math.min(...corners.map(point => point.y));
+    const rect = { left, top, width:Math.max(...corners.map(point => point.x))-left, height:Math.max(...corners.map(point => point.y))-top };
+    return { phase, progress, rect, polygon:corners, fallback:unavailable };
+  }
+  function notifyCamera() { options.onCamera?.(cameraState()); }
+  function targets(entering) {
+    if (!entering || !screenObject) return { position:cameraHome.clone(), target:homeTarget.clone() };
+    screenObject.updateWorldMatrix(true, false);
+    const target = screenObject.getWorldPosition(new THREE.Vector3());
+    const normal = new THREE.Vector3(0,0,1).applyQuaternion(screenObject.getWorldQuaternion(new THREE.Quaternion()));
+    const tangent = Math.tan(THREE.MathUtils.degToRad(camera.fov/2));
+    const distance = Math.max(.73/(2*tangent*.91), 1.18/(2*tangent*camera.aspect*.93));
+    return { target, position:target.clone().addScaledVector(normal, distance) };
+  }
+  function move(entering) {
+    if (disposed || (entering && ['entering','browser'].includes(phase)) || (!entering && ['attract','exiting'].includes(phase))) return;
+    if (active) { active = null; controls.forEach(control => { control.pressed = false; }); }
+    targetRotation.set(0,0); cabinet.rotation.set(0,0,0); joystickX = joystickY = 0;
+    const destination = targets(entering);
+    phase = entering ? 'entering' : 'exiting';
+    if (entering) { powered = true; bootAt = motion.matches ? null : performance.now(); screenMode = 'browser'; }
+    textureFrame = -1;
+    if (unavailable || motion.matches) {
+      camera.position.copy(destination.position); viewTarget.copy(destination.target); camera.lookAt(viewTarget);
+      phase = entering ? 'browser' : 'attract'; progress = entering ? 1 : 0; transition = null; bootAt = null; camera.updateMatrixWorld(true);
+      announce(entering ? 'Arcade ready. Choose a game on the screen.' : 'Press START to enter the arcade.'); notifyCamera(); wake(); return;
+    }
+    transition = { at:performance.now(), duration:entering ? 1550 : 1050, entering,
+      from:camera.position.clone(), fromTarget:viewTarget.clone(), ...destination };
+    announce(entering ? 'Powering on. Entering the arcade screen.' : 'Returning to the arcade machine.'); notifyCamera(); wake();
+  }
+  const api = {
+    enter:() => move(true), exit:() => move(false),
+    setScreenMode(mode) { screenMode = ['idle','browser','playing'].includes(mode) ? mode : 'browser'; textureFrame = -1; wake(); },
+    dispose() { cleanup(); },
+  };
+  let cleanup = () => { disposed = true; events.abort(); resizeObserver?.disconnect(); intersectionObserver?.disconnect(); };
 
   function material(color, extra = {}) {
     return keep(new THREE.MeshStandardMaterial({ color, roughness: .68, metalness: .14, ...extra }));
@@ -68,23 +126,20 @@ export function mountCabinet(host) {
     if (!controls.has(id)) controls.set(id, { group, rest: group.position.y, pressed: false });
     return object;
   }
-  function announce(text) { status.textContent = text; }
+  function announce(text) { if (status) status.textContent = text; }
   function feedback(text) {
     message = text; messageUntil = performance.now() + 1400; textureFrame = -1; wake();
   }
   function boot() {
-    if (bootAt !== null) return;
-    powered = motion.matches; bootAt = motion.matches ? null : performance.now(); textureFrame = -1;
-    announce(powered ? 'CRT ready. Click the screen to open the game library.' : 'CRT starting.'); wake();
-  }
-  function openLibrary() {
-    // Use the same anchor as the hero's existing library link.
-    host.querySelector('[data-cabinet-library]').click();
+    if (phase !== 'attract') return;
+    options.onStart?.();
+    if (phase === 'attract') api.enter();
   }
   function activate(id) {
     if (id === 'start') boot();
-    else if (id === 'screen') openLibrary();
+    else if (id === 'screen') boot();
     else if (id?.startsWith('button')) {
+      options.onControl?.(id);
       if (!powered && bootAt === null) announce(`Button ${id.slice(-1)} pressed. Press START to power the CRT.`);
       else { announce(`Button ${id.slice(-1)} pressed.`); feedback(`BUTTON ${id.slice(-1)}  /  INPUT OK`); }
     }
@@ -94,22 +149,23 @@ export function mountCabinet(host) {
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' });
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
     renderer.setClearColor(0x000000, 0); renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.25;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.18;
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.domElement.setAttribute('aria-hidden', 'true');
     stage.append(renderer.domElement);
     touchStick=document.createElement('div');touchStick.className='cabinet-stick-touch';touchStick.setAttribute('aria-hidden','true');stage.append(touchStick);
-    scene.add(new THREE.HemisphereLight(0xe6e8e5, 0x393339, 2.6));
-    const key = new THREE.DirectionalLight(0xffe5c7, 4.2);
+    scene.fog = new THREE.FogExp2(0x090c10, .045);
+    scene.add(new THREE.HemisphereLight(0xc5d2e0, 0x211712, 1.7));
+    const key = new THREE.DirectionalLight(0xffd3a6, 4.0);
     key.position.set(-3.2, 6, 5); key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024); key.shadow.camera.left = -4; key.shadow.camera.right = 4;
     key.shadow.camera.top = 4; key.shadow.camera.bottom = -4; key.shadow.normalBias = .025;
     key.shadow.bias = -.0002; key.shadow.radius = 3; scene.add(key);
-    const rim = new THREE.DirectionalLight(0xe89151, 2.1); rim.position.set(4, 3, -3); scene.add(rim);
-    const fill = new THREE.DirectionalLight(0xb1cad5, 1.1); fill.position.set(3, 1, 4); scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xf18338, 3.0); rim.position.set(4, 3, -3); scene.add(rim);
+    const fill = new THREE.DirectionalLight(0x77c7db, 1.15); fill.position.set(-4, 1, 2); scene.add(fill);
 
     const shell = material(0x292d30), edge = material(0x161a1d), panel = material(0x363a3c);
-    const orange = material(0xb76a35, { roughness: .45 });
+    const orange = material(0xe68439, { roughness: .43, emissive:0xa43c12, emissiveIntensity:.18 });
     const metal = material(0x8d9595, { metalness: .8, roughness: .34 });
     const black = material(0x080c0e), trim = material(0x42484b);
     // Side profile is extruded as two wooden panels, with continuous T-moulding.
@@ -128,20 +184,23 @@ export function mountCabinet(host) {
     box(1.55, .43, 1.10, 0, 1.53, .01, shell);
     box(1.47, .30, .035, 0, 1.53, .604, black);
     const marquee = texture(1024, 256, ctx => {
-      ctx.fillStyle = '#131d21'; ctx.fillRect(0,0,1024,256);
-      ctx.strokeStyle = '#5b4533'; ctx.lineWidth = 3; ctx.strokeRect(16,16,992,224);
+      const panelLight = ctx.createLinearGradient(0,0,0,256); panelLight.addColorStop(0,'#482814'); panelLight.addColorStop(.5,'#221c17'); panelLight.addColorStop(1,'#13191b');
+      ctx.fillStyle = panelLight; ctx.fillRect(0,0,1024,256);
+      ctx.strokeStyle = '#c6743d'; ctx.lineWidth = 4; ctx.strokeRect(16,16,992,224);
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.font = '800 90px "Segoe UI", Arial, sans-serif'; ctx.fillStyle = '#f0ad77'; ctx.fillText('RETRO', 319,122);
-      ctx.font = '300 90px "Segoe UI", Arial, sans-serif'; ctx.fillStyle = '#f5e8d8'; ctx.fillText('ARCADE', 693,122);
-      ctx.font = '18px monospace'; ctx.fillStyle = '#a99982'; ctx.fillText('GOOD GAMES NEVER GET OLD', 512,202);
+      ctx.shadowColor='#ff792d'; ctx.shadowBlur=16;
+      ctx.font = '900 95px "Arial Black", Arial, sans-serif'; ctx.fillStyle = '#ffc078'; ctx.fillText('RETRO', 316,115);
+      ctx.shadowBlur=8; ctx.font = '900 95px "Arial Black", Arial, sans-serif'; ctx.fillStyle = '#f9e6c6'; ctx.fillText('ARCADE', 704,115);
+      ctx.shadowBlur=0; ctx.font = '18px monospace'; ctx.fillStyle = '#c1a082'; ctx.fillText('ONE CABINET. EVERY CLASSIC.', 512,205);
+      ctx.fillStyle='#e08b4f'; ctx.fillRect(58,190,80,3); ctx.fillRect(886,190,80,3);
     });
     decal(marquee,1.45,.29,0,1.53,.625);
     // Screen sits inside a solid tilted bezel; its subtly convex glass has real depth.
-    const screenHousing = new THREE.Group(); screenHousing.position.set(0,.83,.43); screenHousing.rotation.x = -.20; cabinet.add(screenHousing);
+    const screenHousing = new THREE.Group(); screenHousing.position.set(0,.83,.43); screenHousing.rotation.x = -.14; cabinet.add(screenHousing);
     box(1.54,1.0,.19,0,0,-.045,edge,screenHousing);
     box(1.32,.84,.035,0,0,.061,black,screenHousing);
     box(1.23,.77,.025,0,0,.084,trim,screenHousing);
-    const screenMap = texture(512,384);
+    const screenMap = texture(800,500);
     const glass = new THREE.PlaneGeometry(1.18,.73,24,18);
     const pos = glass.attributes.position;
     for (let i=0;i<pos.count;i++) {
@@ -150,7 +209,8 @@ export function mountCabinet(host) {
     }
     glass.computeVertexNormals();
     const screen = mesh(glass,keep(new THREE.MeshBasicMaterial({ map:screenMap,toneMapped:false })),screenHousing);
-    screen.position.z=.103; screen.castShadow=false; interactive('screen',screen);
+    screen.position.z=.103; screen.castShadow=false; screenObject=screen; interactive('screen',screen);
+    const crtLight = new THREE.PointLight(0xa4dbc2, .75, 2.8, 2); crtLight.position.set(0,.86,.85); cabinet.add(crtLight);
     // Speaker grille and real fasteners make the upper housing mechanically plausible.
     for (const side of [-1,1]) for (let i=0;i<6;i++) box(.17,.012,.014, side*.54,1.285-i*.027,.557,black);
     for (const x of [-.70,.70]) for (const y of [.36,1.26]) {
@@ -194,9 +254,32 @@ export function mountCabinet(host) {
     const lock=cylinder(.025,.008,0,0,0,metal);lock.rotation.x=Math.PI/2;lock.position.set(.13,-.80,.633);
     box(1.40,.13,.025,0,-1.55,.59,edge);
     decal(label('R ↗',1,1,'#bd855c',54),.43,.14,0,-1.29,.588);
+    // Restrained side artwork and cabinet serial labels, printed into geometry.
+    const sideArt = texture(512,1024,ctx=>{
+      ctx.clearRect(0,0,512,1024); ctx.lineWidth=8; ctx.strokeStyle='#d47a3b';
+      for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(36+i*37,920);ctx.lineTo(465,440+i*37);ctx.stroke();}
+      ctx.fillStyle='#f1b579';ctx.font='900 105px "Arial Black", Arial, sans-serif';ctx.save();ctx.translate(275,390);ctx.rotate(-Math.PI/2);ctx.fillText('R / 01',0,0);ctx.restore();
+      ctx.fillStyle='#9c7b60';ctx.font='18px monospace';ctx.fillText('RETRO ARCADE',110,966);
+    });
+    const sideMark = decal(sideArt, .90,2.55,.883,-.15,.02); sideMark.rotation.y=Math.PI/2;
+    decal(label('SYSTEM 01  /  EST. 1995',1,1,'#8b9290',22),.64,.055,0,-1.42,.613);
+    for(const x of [-.63,.63]) for(const y of [-1.45,-.35]) { const fastener=cylinder(.013,.008,0,0,0,metal); fastener.rotation.x=Math.PI/2;fastener.position.set(x,y,.615); }
     // Cabinet rests on a floor; it never floats or rotates about an arbitrary corner.
-    const floor=mesh(new THREE.PlaneGeometry(12,12),keep(new THREE.ShadowMaterial({opacity:.09})),scene);
+    const floorMap=texture(512,512,ctx=>{
+      ctx.fillStyle='#101418';ctx.fillRect(0,0,512,512);ctx.strokeStyle='#22272a';ctx.lineWidth=2;ctx.strokeRect(1,1,510,510);
+      for(let y=0;y<512;y+=64){ctx.fillStyle='#ffffff03';ctx.fillRect(0,y,512,1);}
+    }); floorMap.wrapS=floorMap.wrapT=THREE.RepeatWrapping;floorMap.repeat.set(14,14);
+    const floor=mesh(new THREE.PlaneGeometry(28,28),material(0x777b7e,{map:floorMap,roughness:.42,metalness:.25}),scene);
     floor.rotation.x=-Math.PI/2;floor.position.y=-1.83;floor.castShadow=false;
+    const wallMat=material(0x11161c,{roughness:.9}); box(24,8,.12,0,1.5,-4,wallMat,scene);
+    const neonMat=keep(new THREE.MeshBasicMaterial({color:0xf28c49,toneMapped:false}));
+    const cyanMat=keep(new THREE.MeshBasicMaterial({color:0x80cad0,toneMapped:false}));
+    for(const x of [-4.7,4.7]){
+      box(.025,4.9,.03,x,.55,-3.9,x<0?cyanMat:neonMat,scene);
+      box(.13,5.1,.08,x,.55,-3.95,edge,scene);
+      const glow = new THREE.PointLight(x<0?0x54a6b2:0xe9732d,3.5,8,2); glow.position.set(x,.6,-2.8); scene.add(glow);
+    }
+    for(let i=-5;i<=5;i++) box(.018,6,.05,i*1.4,.8,-3.9,trim,scene);
     const contactMap=texture(256,256,ctx=>{
       const gradient=ctx.createRadialGradient(128,128,10,128,128,125);
       gradient.addColorStop(0,'#0009');gradient.addColorStop(.45,'#0006');gradient.addColorStop(1,'#0000');
@@ -207,35 +290,32 @@ export function mountCabinet(host) {
 
     function drawScreen(now) {
       const elapsed=bootAt===null?0:now-bootAt;
-      if(bootAt!==null&&elapsed>2200){bootAt=null;powered=true;announce('CRT ready. Click the screen to open the game library.');}
-      const phase=bootAt===null?(powered?'ready':'off'):Math.floor(elapsed/65);
-      const key=`${phase}/${now<messageUntil?message:''}`;
+      const paintPhase=bootAt===null?(powered?'ready':'off'):Math.floor(elapsed/65);
+      const key=`${paintPhase}/${screenMode}/${now<messageUntil?message:''}`;
       if(key===textureFrame)return;textureFrame=key;
       const ctx=screenMap.image.getContext('2d');
-      ctx.fillStyle='#091414';ctx.fillRect(0,0,512,384);
+      ctx.fillStyle='#08130f';ctx.fillRect(0,0,800,500);
       ctx.textAlign='center';ctx.textBaseline='middle';
       if(bootAt!==null&&!motion.matches&&elapsed<260){
-        ctx.fillStyle='#e3f3d3';ctx.fillRect(65,191,382,Math.max(2,elapsed/18));
+        ctx.fillStyle='#d7f1d2';ctx.fillRect(75,249,650,Math.max(2,elapsed/18));
       }else if(bootAt!==null&&!motion.matches){
-        ctx.textAlign='left';ctx.font='19px monospace';ctx.fillStyle='#b8c2a1';
-        ['RETRO ARCADE / SYSTEM 01','MEMORY CHECK ........ OK','CONTROLS ............ OK','LOADING THE CLASSICS ...'].slice(0,Math.min(4,1+Math.floor((elapsed-260)/400))).forEach((line,i)=>ctx.fillText(line,30,95+i*45));
-        ctx.fillStyle='#344138';ctx.fillRect(30,310,452,7);ctx.fillStyle='#eaa774';ctx.fillRect(30,310,452*Math.min(1,elapsed/2200),7);
-      }else if(powered||bootAt!==null){
-        ctx.strokeStyle='#3e4c342f';ctx.lineWidth=1;
-        for(let x=-300;x<850;x+=75){ctx.beginPath();ctx.moveTo(256,180);ctx.lineTo(x,384);ctx.stroke();}
-        for(let y=242;y<384;y+=26){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(512,y);ctx.stroke();}
-        ctx.fillStyle='#95a899';ctx.font='14px monospace';ctx.fillText('PLAYER 1  /  READY',256,41);
-        ctx.fillStyle='#edb683';ctx.font='bold 47px monospace';ctx.fillText('ONE MORE',256,143);ctx.font='bold 64px monospace';ctx.fillText('ROUND.',256,204);
-        ctx.fillStyle='#aabb9d';ctx.font='16px monospace';ctx.fillText(now<messageUntil?message:'OPEN GAME LIBRARY  >',256,303);
-        if(joystickX||joystickY){ctx.fillStyle='#efb37d';ctx.beginPath();ctx.arc(256+joystickX*110,347+joystickY*15,4,0,Math.PI*2);ctx.fill();}
+        ctx.textAlign='left';ctx.font='24px monospace';ctx.fillStyle='#b9d6b8';
+        ['RETRO ARCADE / SYSTEM 01','DISPLAY ............. OK','CONTROLS ............ OK','ENTERING THE ARCADE ...'].slice(0,Math.min(4,1+Math.floor((elapsed-260)/270))).forEach((line,i)=>ctx.fillText(line,54,130+i*57));
+        ctx.fillStyle='#344138';ctx.fillRect(54,410,692,6);ctx.fillStyle='#efa467';ctx.fillRect(54,410,692*Math.min(1,elapsed/1550),6);
       }else{
-        ctx.fillStyle='#35504a';ctx.font='bold 77px monospace';ctx.fillText('R ↗',256,169);
-        ctx.fillStyle='#b2bba5';ctx.font='19px monospace';ctx.fillText('PRESS START',256,278);
+        ctx.strokeStyle='#6c9b7428';ctx.lineWidth=1;
+        for(let x=-300;x<1100;x+=80){ctx.beginPath();ctx.moveTo(400,235);ctx.lineTo(x,500);ctx.stroke();}
+        for(let y=300;y<500;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(800,y);ctx.stroke();}
+        ctx.fillStyle='#82a28b';ctx.font='19px monospace';ctx.fillText('SYSTEM 01  /  ALL CLASSICS',400,60);
+        ctx.shadowColor='#d79150';ctx.shadowBlur=18;
+        ctx.fillStyle='#f2bb78';ctx.font='900 108px monospace';ctx.fillText('RETRO',400,177);ctx.fillText('ARCADE',400,285);ctx.shadowBlur=0;
+        ctx.fillStyle='#b9d0ab';ctx.font='bold 27px monospace';ctx.fillText(now<messageUntil?message:screenMode==='playing'?'GAME IN PROGRESS':powered?'SELECT YOUR GAME':'[ PRESS START ]',400,393);
+        ctx.fillStyle='#78957a';ctx.font='16px monospace';ctx.fillText('NO QUARTERS REQUIRED',400,452);
       }
       // Restrained glass reflection, edge vignette and static CRT scanlines.
-      const reflection=ctx.createLinearGradient(0,0,420,320);reflection.addColorStop(0,'#c9d6cf0c');reflection.addColorStop(.45,'#c9d6cf04');reflection.addColorStop(1,'#0000');ctx.fillStyle=reflection;ctx.fillRect(0,0,512,384);
-      ctx.fillStyle='#00000022';for(let y=0;y<384;y+=4)ctx.fillRect(0,y,512,1);
-      const vignette=ctx.createRadialGradient(256,192,95,256,192,310);vignette.addColorStop(0,'#0000');vignette.addColorStop(1,'#0009');ctx.fillStyle=vignette;ctx.fillRect(0,0,512,384);
+      const reflection=ctx.createLinearGradient(0,0,650,430);reflection.addColorStop(0,'#c9d6cf0e');reflection.addColorStop(.45,'#c9d6cf04');reflection.addColorStop(1,'#0000');ctx.fillStyle=reflection;ctx.fillRect(0,0,800,500);
+      ctx.fillStyle='#00000026';for(let y=0;y<500;y+=4)ctx.fillRect(0,y,800,1);
+      const vignette=ctx.createRadialGradient(400,250,150,400,250,460);vignette.addColorStop(0,'#0000');vignette.addColorStop(1,'#000b');ctx.fillStyle=vignette;ctx.fillRect(0,0,800,500);
       screenMap.needsUpdate=true;
     }
     function pick(event) {
@@ -270,15 +350,19 @@ export function mountCabinet(host) {
       wake();
     }
     const movePointer=event=>{
+      if(screenMode==='playing')return;
       if(active){
         if(event.pointerId===active.pointerId&&active.id==='joystick'){
           const dx=(event.clientX-active.x)/48,dy=(event.clientY-active.y)/48;
-          const length=Math.max(1,Math.hypot(dx,dy));joystickX=dx/length;joystickY=dy/length;textureFrame=-1;wake();
+          const length=Math.max(1,Math.hypot(dx,dy));joystickX=dx/length;joystickY=dy/length;
+          const direction=Math.max(Math.abs(dx),Math.abs(dy))>.45?(Math.abs(dx)>Math.abs(dy)?dx<0?'left':'right':dy<0?'up':'down'):null;
+          if(direction&&active.direction!==direction){active.direction=direction;options.onControl?.(direction);}else if(!direction)active.direction=null;
+          textureFrame=-1;wake();
         }
         return; // A held control never drives the cabinet's mouse-follow rotation.
       }
       const id=pick(event);setHover(id);
-      if(id||!fine.matches||motion.matches)return;
+      if(id||!fine.matches||motion.matches||phase!=='attract')return;
       targetRotation.set(THREE.MathUtils.clamp(pointer.y*-.028,-.028,.028),THREE.MathUtils.clamp(pointer.x*.075,-.075,.075));wake();
     };
     listen(renderer.domElement,'pointermove',movePointer);
@@ -314,19 +398,30 @@ export function mountCabinet(host) {
         if(['Enter',' '].includes(event.key)){if(controls.has(id))controls.get(id).pressed=true;wake();}
         if(id==='joystick'&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)){
           event.preventDefault();joystickX=event.key==='ArrowLeft'?-1:event.key==='ArrowRight'?1:0;joystickY=event.key==='ArrowUp'?-1:event.key==='ArrowDown'?1:0;textureFrame=-1;wake();
+          options.onControl?.(event.key.replace('Arrow','').toLowerCase());
         }
       });
       listen(button,'keyup',()=>{if(controls.has(id))controls.get(id).pressed=false;joystickX=joystickY=0;textureFrame=-1;wake();});
       listen(button,'click',event=>{if(controls.has(id)){const c=controls.get(id);c.pressed=false;if(event.detail===0)c.pressUntil=performance.now()+140;}activate(id);wake();});
     });
-    listen(host.querySelector('[data-cabinet-zoom]'),'click',event=>{zoom=!zoom;event.currentTarget.setAttribute('aria-pressed',String(zoom));wake();});
-    function resize(){if(disposed)return;const r=stage.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();wake();}
+    listen(host.querySelector('[data-cabinet-zoom]'),'click',()=>{phase==='attract'?boot():api.exit();});
+    function resize(){
+      if(disposed)return;dimensions();
+      if(unavailable){notifyCamera();return;}
+      renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();
+      cameraHome.set(3.1,2.25,7.65).multiplyScalar(Math.max(1,.76/camera.aspect));
+      const destination=targets(phase==='browser'||phase==='entering');
+      if(transition){transition.position=destination.position;transition.target=destination.target;}
+      else{camera.position.copy(destination.position);viewTarget.copy(destination.target);camera.lookAt(viewTarget);}
+      wake();
+    }
     function tick(now){
       frame=0;if(disposed||!visible||document.hidden)return;
+      if(unavailable){notifyCamera();return;}
       const dt=Math.min((now-lastTime)/1000||1/60,.05);lastTime=now;
       const k=motion.matches?1:1-Math.exp(-12*dt);let moving=false;
       const approach=(object,key,target)=>{const delta=target-object[key];if(Math.abs(delta)>.0001){object[key]+=delta*k;moving=true;}else object[key]=target;};
-      approach(cabinet.rotation,'x',motion.matches?0:targetRotation.x);approach(cabinet.rotation,'y',motion.matches?0:targetRotation.y);
+      approach(cabinet.rotation,'x',motion.matches||phase!=='attract'?0:targetRotation.x);approach(cabinet.rotation,'y',motion.matches||phase!=='attract'?0:targetRotation.y);
       for(const [id,c] of controls){
         if(id==='joystick'||id==='screen')continue;
         approach(c.group.position,'y',c.rest-((c.pressed||now<(c.pressUntil||0))?.033:0));
@@ -335,35 +430,62 @@ export function mountCabinet(host) {
       }
       approach(stick.rotation,'z',-joystickX*.34);approach(stick.rotation,'x',joystickY*.34);
       ball.material.emissive.setHex(0xd98348);approach(ball.material,'emissiveIntensity',(hovered||focusControl)==='joystick'?.18:0);
-      const desired=cameraHome.clone().multiplyScalar(zoom?.92:1);approach(camera.position,'x',desired.x);approach(camera.position,'y',desired.y);approach(camera.position,'z',desired.z);camera.lookAt(viewTarget);
+      if(transition){
+        const amount=THREE.MathUtils.clamp((now-transition.at)/transition.duration,0,1),eased=amount<.5?8*amount**4:1-8*(1-amount)**4;
+        camera.position.lerpVectors(transition.from,transition.position,eased);viewTarget.lerpVectors(transition.fromTarget,transition.target,eased);
+        progress=transition.entering?amount:1-amount;moving=true;
+        if(amount===1){phase=transition.entering?'browser':'attract';progress=transition.entering?1:0;screenMode=transition.entering?'browser':'idle';transition=null;bootAt=null;textureFrame=-1;announce(phase==='browser'?'Arcade ready. Choose a game on the screen.':'Press START to enter the arcade.');}
+      }
+      camera.lookAt(viewTarget);
       drawScreen(now);renderer.render(scene,camera);
+      notifyCamera();
       const grip=ball.getWorldPosition(new THREE.Vector3()).project(camera);
       touchStick.style.left=`${(grip.x+1)*stage.clientWidth/2}px`;touchStick.style.top=`${(1-grip.y)*stage.clientHeight/2}px`;
-      if(moving||bootAt!==null||now<messageUntil)wake();
+      if((transition||screenMode!=='playing')&&(moving||bootAt!==null||now<messageUntil))wake();
     }
     wake=()=>{if(!frame&&!disposed&&visible&&!document.hidden)frame=requestAnimationFrame(tick);};
     function stop(){cancelAnimationFrame(frame);frame=0;lastTime=0;}
-    function fallback(){host.classList.remove('cabinet-ready');announce('3D view unavailable. Use the library link to choose a game.');dispose();}
-    function dispose(){
-      if(disposed)return;disposed=true;stop();events.abort();resizeObserver?.disconnect();intersectionObserver?.disconnect();
-      for(const resource of resources)resource.dispose();key.shadow.map?.dispose();renderer.dispose();renderer.domElement.remove();touchStick.remove();
+    function releaseScene(){
+      stop();for(const resource of resources)resource.dispose();resources.clear();key.shadow.map?.dispose();renderer?.dispose();renderer?.domElement.remove();touchStick?.remove();renderer=null;
     }
+    function fallback(){
+      unavailable=true;releaseScene();host.classList.remove('cabinet-ready');host.classList.add?.('cabinet-fallback');
+      if(phase==='entering'){phase='browser';progress=1;}else if(phase==='exiting'){phase='attract';progress=0;}
+      transition=null;bootAt=null;dimensions();notifyCamera();announce('3D view unavailable. Use START or the library link to choose a game.');
+    }
+    cleanup=()=>{if(disposed)return;disposed=true;stop();events.abort();resizeObserver?.disconnect();intersectionObserver?.disconnect();releaseScene();};
     listen(renderer.domElement,'webglcontextlost',event=>{event.preventDefault();fallback();});
     listen(document,'visibilitychange',()=>{if(document.hidden){clearInput();stop();}else wake();});
-    listen(motion,'change',()=>{targetRotation.set(0,0);textureFrame=-1;wake();});
-    listen(window,'pagehide',event=>{if(event.persisted){clearInput();stop();}else dispose();});
+    listen(motion,'change',()=>{
+      targetRotation.set(0,0);textureFrame=-1;
+      if(motion.matches&&transition){
+        camera.position.copy(transition.position);viewTarget.copy(transition.target);phase=transition.entering?'browser':'attract';progress=transition.entering?1:0;
+        screenMode=transition.entering?'browser':'idle';transition=null;bootAt=null;camera.lookAt(viewTarget);camera.updateMatrixWorld(true);notifyCamera();
+      }
+      wake();
+    });
+    listen(window,'pagehide',event=>{if(event.persisted){clearInput();stop();}else api.dispose();});
     listen(window,'pageshow',event=>{if(event.persisted)wake();});
     resizeObserver=new ResizeObserver(resize);resizeObserver.observe(stage);
     intersectionObserver=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible)wake();else{clearInput();stop();}},{rootMargin:'40px'});intersectionObserver.observe(stage);
     // Only hide the fallback after the first complete WebGL render succeeds.
-    resize();drawScreen(performance.now());renderer.render(scene,camera);
-    host.classList.add('cabinet-ready');announce('Press START to power the CRT. Drag the joystick or try the buttons.');
-    return dispose;
+    resize();drawScreen(performance.now());renderer.render(scene,camera);notifyCamera();
+    host.classList.add('cabinet-ready');announce('Press START to enter the arcade. The joystick and buttons work, too.');
+    return api;
   } catch(error) {
-    disposed=true;events.abort();resizeObserver?.disconnect();intersectionObserver?.disconnect();if(frame)cancelAnimationFrame(frame);
-    for(const resource of resources)resource.dispose();renderer?.dispose();renderer?.domElement.remove();touchStick?.remove();
-    host.classList.remove('cabinet-ready');announce('3D view unavailable. Use the library link to choose a game.');
+    unavailable=true;events.abort();resizeObserver?.disconnect();intersectionObserver?.disconnect();if(frame)cancelAnimationFrame(frame);
+    for(const resource of resources)resource.dispose();resources.clear();renderer?.dispose();renderer?.domElement.remove();touchStick?.remove();renderer=null;
+    host.classList.remove('cabinet-ready');host.classList.add?.('cabinet-fallback');announce('3D view unavailable. Use START or the library link to choose a game.');
+    dimensions();notifyCamera();
+    if(typeof ResizeObserver!=='undefined'&&stage){resizeObserver=new ResizeObserver(()=>{dimensions();notifyCamera();});resizeObserver.observe(stage);}
     console.info('Arcade cabinet: static fallback enabled.', error.message);
-    return ()=>{};
+    return api;
   }
+}
+
+// Legacy embeds still receive an idempotent cleanup function. The new API is
+// also attached to it so a transition can be adopted without breaking callers.
+export function mountCabinet(host, options = {}) {
+  const api = initArcadeCabinet(host, options);
+  return Object.assign(() => api.dispose(), api);
 }

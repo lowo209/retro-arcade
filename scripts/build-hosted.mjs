@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PREVIEW_FILES, normalizeBasePath, buildPreview } from './build-preview.mjs';
+import { PREVIEW_FILES, normalizeBasePath, buildPreview, versionBuildSources } from './build-preview.mjs';
 import { GAMES } from '../public/catalog.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -80,8 +80,9 @@ export function buildHosted({ root = ROOT, basePath = '/', repository = 'lowo209
     ['LICENSE', fs.readFileSync(path.join(root, 'LICENSE'), 'utf8')], ['.nojekyll', ''],
     ['preview-build.json', JSON.stringify({ mode: 'playable-test', basePath: base, repository, gamesIncluded: false, firmwareIncluded: false }, null, 2)],
     ['software.html', `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Emulator software — Retro Arcade</title><link rel="stylesheet" href="${base}styles.css"></head><body><main class="game-main"><a href="${base}">← Back to library</a><h1>Emulator licenses & source</h1><p>EmulatorJS 4.2.3 runs the original games through separate emulator cores. These components keep their own licenses; the website’s MIT license does not replace them.</p><ul><li><a href="${assets}vendor/emulatorjs/LICENSE">EmulatorJS GPL-3.0 license</a> · <a href="${assets}vendor/emulatorjs/data/src/emulator.js">Installed, modified frontend source</a> · <a href="https://github.com/EmulatorJS/EmulatorJS/tree/v4.2.3">Complete upstream frontend source</a></li><li><a href="${assets}notices/pcsx_rearmed/license.txt">PCSX ReARMed license</a> · <a href="${assets}notices/mame2003_plus/license.txt">MAME 2003 Plus license</a></li><li><a href="${assets}sources/index.html">Corresponding emulator core sources and build scripts</a></li></ul><p>The installed frontend has one modification: its optional update check is disabled. The reproducible patch is in <a href="https://github.com/${repository}/blob/main/scripts/setup.py">setup.py</a>. Unminified frontend sources are available beside the runtime. MAME 2003 Plus retains its non-commercial licensing restrictions. This tester site has no advertising or paid access.</p><p>Game files, firmware, cover artwork and trademarks are separate from the software licenses.</p></main></body></html>`]);
-  for (const [relative, data] of sources) { const file = path.join(output, relative); fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, data); }
-  return { output, basePath: base, files: sources.map(([name]) => name) };
+  const versioned = versionBuildSources(sources, { basePath: base, configuration: JSON.stringify(library) });
+  for (const [relative, data] of versioned.sources) { const file = path.join(output, relative); fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, data); }
+  return { output, basePath: base, release: versioned.release, files: sources.map(([name]) => name) };
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const argument = name => process.argv.slice(2).find(value => value.startsWith(`--${name}=`))?.slice(name.length + 3);

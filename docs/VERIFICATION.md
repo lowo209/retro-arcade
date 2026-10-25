@@ -1,5 +1,14 @@
 # Verification log
 
+## 25 October 2026 — Interactive arcade-machine redesign
+
+- Replaced the landing-page library and separate game-detail flow with a full-viewport cabinet. Start moves the camera into the CRT; its actual HTML display contains a horizontal cover browser, filters, favorites, search, menus and the game iframe. Power returns to the full machine. Previously shared game links select their title in the cabinet and still require explicit entry/play.
+- The in-screen menu contains game information, GT2's separate disc choices, keyboard layouts for each player, gamepad guidance, saves, browser help, feedback and software/source links. Menus contain focus and make the covered browser/player inert. Arrow browsing moves keyboard focus with the selected title; single-player menus expose only Player 1. The hidden Start control is inert after entry.
+- Built hosted output tested at its real `/retro-arcade/` prefix using the unchanged R2 release: Start by click and Enter, eight-game carousel, keyboard selection, favorites add/remove and empty state, search selecting Ghost, both GT2 options, P2 controls and single-player reset, unavailable GT4 information, menus, fullscreen entry/exit, Back and power teardown. Explicit keyboard entry produced zero iframes until Play. Legacy `game.html?id=gt2` routed correctly and retained GT2 selection.
+- UMK3 and Ace Combat 3 reached emulator-running state inside the new CRT using actual R2 assets. These are launch/integration checks; earlier gameplay/audio/controller results remain separate. Back and leaving the cabinet left zero game iframes. No game files, BIOS, save IDs or emulator mappings changed.
+- Layout checks at 1440×900, 390×844 portrait and 844×390 landscape: the display stayed within the viewport with no horizontal document overflow. Portrait covers were adjusted to avoid tall cropping. Desktop and portrait menus remain inside the CRT with their own scrolling content. Browser console review found no application warnings/errors during these flows.
+- Added session ownership/message-validation/teardown tests, normal and reduced-motion cabinet fallback lifecycle tests, and deterministic deployment-version tests. Source-only publication checks still exclude games, firmware, runtime binaries and credentials. The first-party HTML/CSS/module graph and player iframe share a build version so existing browsers load a consistent redesign; vendor and R2 URLs are unchanged. Physical controller browsing and audio quality were not newly measured.
+
 ## 24 October 2026 — Playable tester rollout request
 
 - The user reports that audio and multiplayer work. This is user-confirmed; specific titles, controller hardware and audio outputs were not named. Earlier per-game agent verification records remain separate.

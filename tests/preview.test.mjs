@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { buildPreview, normalizeBasePath, PREVIEW_FILES } from '../scripts/build-preview.mjs';
+import { buildPreview, normalizeBasePath, PREVIEW_FILES, versionBuildSources } from '../scripts/build-preview.mjs';
 import { siteUrl } from '../public/catalog.js';
 
 function fixture(t) {
@@ -25,8 +25,12 @@ test('public build contains only interface assets and never advertises private g
   assert.equal(result.files.length, PREVIEW_FILES.length + 3);
   assert.ok(!result.files.some(file => /private|vendor|\.bin$|\.jpg$|frame\.html/.test(file)));
   const html = fs.readFileSync(path.join(result.output, 'index.html'), 'utf8');
-  assert.match(html, /src="\/retro-arcade\/app.js"/);
-  assert.match(html, /href="\/retro-arcade\/#setup"/);
+  assert.ok(html.includes(`src="/retro-arcade/app.js?v=${result.release}"`));
+  assert.ok(html.includes(`href="/retro-arcade/arcade.css?v=${result.release}"`));
+  assert.match(html, /id="arcade-menu"/);
+  assert.match(html, /data-cabinet-control="start"/);
+  assert.ok(result.files.includes('arcade-session.js'));
+  assert.ok(result.files.includes('arcade.css'));
   const config = JSON.parse(fs.readFileSync(path.join(result.output, 'preview-build.json')));
   assert.equal(config.gamesIncluded, false); assert.equal(config.firmwareIncluded, false);
   const originalFetch = globalThis.fetch;
@@ -40,6 +44,42 @@ test('public build contains only interface assets and never advertises private g
   } finally { globalThis.fetch = originalFetch; }
   assert.match(fs.readFileSync(path.join(root, 'public/deployment.js'), 'utf8'), /IS_PREVIEW = false/);
   assert.ok(result.files.every(file => !fs.readFileSync(path.join(result.output, file), 'utf8').includes('PRIVATE_SENTINEL')));
+});
+
+test('deployment versions refresh the first-party module graph without rewriting vendor imports', () => {
+  const sources = [
+    ['index.html', '<link rel="stylesheet" href="/retro-arcade/arcade.css"><script type="module" src="/retro-arcade/app.js"></script>'],
+    ['app.js', "import { games } from './catalog.js'; import('./arcade-cabinet.js'); import('./arcade-session.js'); const unrelated = './catalog.js'; import('https://example.test/widget.js');"],
+    ['catalog.js', "export { preview } from './deployment.js';"],
+    ['deployment.js', 'export const preview = true;'],
+    ['arcade-cabinet.js', "import * as THREE from './lib/three/three.module.min.js';"],
+    ['arcade-session.js', "import { games } from './catalog.js';"],
+    ['arcade.css', 'body { color: orange; }'],
+    ['lib/three/three.module.min.js', "export * from './three.core.min.js';"],
+    ['lib/three/three.core.min.js', 'export const vendor = true;'],
+  ];
+  const build = value => versionBuildSources(value, { basePath: '/retro-arcade/', configuration: 'preview' });
+  const first = build(sources), repeated = build(sources), reversed = build([...sources].reverse());
+  assert.equal(first.release, repeated.release);
+  assert.equal(first.release, reversed.release);
+  assert.match(first.release, /^[a-f0-9]{12}$/);
+  const output = Object.fromEntries(first.sources);
+  assert.ok(output['index.html'].includes(`/arcade.css?v=${first.release}`));
+  assert.ok(output['index.html'].includes(`/app.js?v=${first.release}`));
+  assert.ok(output['app.js'].includes(`'./catalog.js?v=${first.release}'`));
+  assert.ok(output['app.js'].includes(`'./arcade-cabinet.js?v=${first.release}'`));
+  assert.ok(output['app.js'].includes(`'./arcade-session.js?v=${first.release}'`));
+  assert.ok(output['app.js'].includes("const unrelated = './catalog.js'"));
+  assert.ok(output['app.js'].includes("import('https://example.test/widget.js')"));
+  assert.ok(output['catalog.js'].includes(`'./deployment.js?v=${first.release}'`));
+  assert.ok(output['arcade-session.js'].includes(`'./catalog.js?v=${first.release}'`));
+  assert.equal(output['arcade-cabinet.js'], sources.find(([name]) => name === 'arcade-cabinet.js')[1]);
+  assert.equal(output['lib/three/three.module.min.js'], sources.find(([name]) => name === 'lib/three/three.module.min.js')[1]);
+  const changed = build(sources.map(([name, data]) => [name, name === 'arcade-session.js' ? data + '\n// changed lifecycle' : data]));
+  assert.notEqual(changed.release, first.release);
+  assert.ok(Object.fromEntries(changed.sources)['app.js'].includes(`?v=${changed.release}`));
+  assert.notEqual(versionBuildSources(sources, { basePath: '/retro-arcade/', configuration: 'hosted' }).release, first.release);
+  assert.ok(!sources.some(([, source]) => source.includes('?v=')), 'The original source is never modified.');
 });
 
 test('Pages navigation resolves under project paths as well as the local root', () => {

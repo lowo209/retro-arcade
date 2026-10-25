@@ -1,5 +1,11 @@
 # Retro Arcade
 
+**The cabinet is the website.** Press **Start** to zoom into its CRT, browse the
+cover carousel, and play inside the same screen. Arrows, mouse wheel, touch and
+gamepad navigate the collection. Search, game information, both GT2 discs,
+controls, saves and help live in the in-screen menu. The power button pulls back
+to the full machine. Previously shared game links still select the right game.
+
 **Playable tester release:** seven games are available from the public link: UMK3, Need for Speed: High Stakes, Gran Turismo 2, Resident Evil 3, Ace Combat 3, Ghost in the Shell and G-Police: Weapons of Justice. GT2 includes separate Arcade and Simulation launches. Games download from Cloudflare R2 and run in the browser; the cabinet, search, filters, favorites and control guides are included.
 
 **Hosting:** [R2-HOSTING.md](docs/R2-HOSTING.md) documents the 4.81 GB release, upload tool, free-usage assumptions and activation checks. Only games in the verified public manifest can launch. GT4 remains unavailable until its separate browser build is ready.
@@ -8,7 +14,12 @@
 
 If every game fails with a WebGL/GLctx error in Firefox, see the local [browser graphics guide](public/guides/browser.html). The player now checks graphics availability before loading a disc and reports caught emulator startup errors.
 
-A private browser arcade with a charcoal and orange library, an interactive 3D hero cabinet, your supplied local covers, hover/focus card effects, favorites, search and filters, individual game pages, fullscreen, two keyboard layouts, gamepad detection, emulator controls and saves. Built with HTML, CSS, JavaScript, locally bundled Three.js and a small Node.js server. No framework, package installation, build step, CDN or native game launcher is required to run the installed site.
+A browser arcade built as a procedural 3D machine, with an illuminated marquee,
+physical controls, a camera transition into the display and an interactive game
+browser inside it. Favorites, search, platform filters, fullscreen, two keyboard
+layouts, gamepad input, emulator controls and saves remain available. Built with
+HTML, CSS, JavaScript, locally bundled Three.js and a small Node.js server. No
+framework or native game launcher is required to run the installed site.
 
 For the **public, link-only site with no visitor installations**, see [R2-HOSTING.md](docs/R2-HOSTING.md). The local server and setup below remain available separately. Browser saves belong to their website address and browser profile; local saves do not automatically transfer to the public site.
 
