@@ -65,9 +65,14 @@
 .arcade-site[data-view='browser'] .room-bottom,.arcade-site[data-view='playing'] .room-bottom { opacity:.55; }
 
 /* The DOM screen matches the physical monitor after the camera settles. */
-.crt-overlay { position:absolute;z-index:12;left:var(--screen-left,8%);top:var(--screen-top,8%);width:var(--screen-width,84%);height:var(--screen-height,84%);display:flex;flex-direction:column;min-width:0;min-height:0;padding:13px 19px 8px;border:10px solid #18211c;border-radius:20px;overflow:hidden;container-type:size;background:#0b1511;color:var(--paper);box-shadow:0 0 0 1px #455140,0 0 0 4px #060b09,0 0 0 7px #30393199,0 10px 35px #000b,inset 0 0 45px #0007;isolation:isolate; }
+.crt-overlay { position:absolute;z-index:12;left:var(--screen-left,8%);top:var(--screen-top,8%);width:var(--screen-width,84%);height:var(--screen-height,84%);display:flex;flex-direction:column;min-width:0;min-height:0;padding:13px 19px 8px;border:10px solid #18211c;border-radius:24px;overflow:hidden;container-type:size;background:#0b1511;color:var(--paper);box-shadow:0 0 0 1px #56604e,0 0 0 4px #050907,0 0 0 7px #303931bb,0 10px 35px #000b,inset 0 3px 5px #c7d6b015,inset 0 -5px 9px #0009;isolation:isolate; }
 .crt-overlay::before { content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 45% 25%,#5a7c3e1c,transparent 62%),linear-gradient(#0f1b15,#09120f);pointer-events:none; }
-.crt-glass { position:absolute;inset:0;z-index:60;pointer-events:none;border-radius:9px;background:repeating-linear-gradient(0deg,#0000 0 3px,#00000013 3px 4px);box-shadow:inset 0 0 42px #0005,inset 0 0 3px #d6edd233;opacity:.75; }
+.crt-overlay::after { content:'';position:absolute;inset:0;z-index:65;pointer-events:none;border-radius:12px;box-shadow:inset 0 0 0 1px #dff0c52b,inset 0 2px 5px #e2efc816,inset 0 -4px 8px #0008; }
+/* Static layers give the CRT texture without flicker or a continuous render loop. */
+.crt-glass { position:absolute;inset:0;z-index:60;pointer-events:none;border-radius:12px;background:repeating-linear-gradient(0deg,transparent 0 2px,#00000030 2px 3px,transparent 3px 4px),radial-gradient(ellipse at 50% 46%,transparent 46%,#00000055 100%);box-shadow:inset 0 0 48px #0008,inset 0 0 6px #c9f6a526; }
+.crt-glass::before { content:'';position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(90deg,#f35b6b09 0 1px,#a3f08707 1px 2px,#67a4f20b 2px 3px); }
+.crt-glass::after { content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(116deg,#f3ffe70e 0%,#f3ffe703 22%,transparent 35%,transparent 75%,#f3ffe704 100%);box-shadow:inset 0 12px 28px -24px #e3f8c6aa; }
+.arcade-site[data-crt='off'] .crt-glass { display:none; }
 .screen-system-bar { flex:none;display:flex;align-items:center;gap:14px;min-height:36px;padding:0 1px 9px;border-bottom:1px solid var(--line);font:clamp(8px,.9cqw,12px) var(--mono); }
 .screen-wordmark { display:flex;align-items:baseline;gap:3px;font-size:clamp(13px,1.6cqw,21px);font-weight:900;white-space:nowrap; }
 .screen-wordmark>span { position:relative;top:-5px;margin-right:5px;color:var(--phosphor);font-size:.52em; }
@@ -187,6 +192,18 @@
 .menu-text-button:hover { color:var(--phosphor); }
 .menu-content .menu-link { display:block;width:fit-content;margin:13px 0;font:clamp(9px,.95cqw,13px) var(--mono);line-height:1.4; }
 .about-emblem { display:block;margin-bottom:22px;color:var(--phosphor);font-size:clamp(45px,8cqw,100px);font-weight:900;line-height:1;letter-spacing:-.09em; }
+.display-setting { display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:88px;margin:22px 0 14px;padding:18px;border:1px solid #b1cf8942;background:#c3ef8808;cursor:pointer; }
+.display-setting-copy { display:flex;flex-direction:column;gap:7px;min-width:0; }
+.display-setting-copy strong { font-size:clamp(15px,1.9cqw,24px);line-height:1.1;color:var(--paper); }
+.display-setting-copy small { color:#8da479;font:clamp(9px,1cqw,13px)/1.5 var(--mono); }
+.display-setting-toggle { display:flex;align-items:center;flex:none;gap:8px; }
+.display-setting-toggle input { appearance:none;-webkit-appearance:none;position:relative;width:48px;height:27px;min-height:0!important;margin:0;padding:0!important;border:1px solid #819b6566!important;border-radius:20px!important;background:#08100b;cursor:pointer;transition:background .15s; }
+.display-setting-toggle input::before { content:'';position:absolute;top:4px;left:4px;width:17px;height:17px;border-radius:50%;background:#829475;transition:transform .15s,background .15s; }
+.display-setting-toggle input:checked { background:var(--phosphor);border-color:var(--phosphor)!important; }
+.display-setting-toggle input:checked::before { transform:translateX(21px);background:#213116; }
+.display-setting-toggle>span::after { content:'OFF';font:clamp(8px,.85cqw,11px) var(--mono);color:#738b62; }
+.display-setting-toggle input:checked+span::after { content:'ON';color:var(--phosphor); }
+.menu-content .display-settings-status { color:#88a873;font:clamp(8px,.9cqw,12px)/1.5 var(--mono); }
 .menu-stat,.menu-stats,.game-facts { display:flex;flex-wrap:wrap;gap:8px 15px;margin-bottom:17px;color:#92ad7a;font:clamp(9px,.95cqw,13px) var(--mono); }
 .menu-warning,.menu-note,.menu-callout { margin:15px 0;padding:12px 14px;border:1px solid #b3c88336;background:#d5ff7606;color:#afbd9a;font:clamp(10px,1.05cqw,14px)/1.55 var(--mono); }
 .menu-warning { border-color:#ff92574d;background:#ff925706;color:#cda17c; }
@@ -238,7 +255,7 @@
 .arcade-session-error { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;width:100%;height:100%;padding:25px;text-align:center;background:radial-gradient(#24301b,#0a140c); }
 .arcade-session-error>strong { color:var(--amber);font-size:clamp(20px,3cqw,42px);font-weight:800;text-transform:uppercase; }
 .arcade-session-error>p { max-width:75%;margin:0;color:#b0bd9f;font:clamp(10px,1.2cqw,16px)/1.6 var(--mono); }
-.crt-overlay:fullscreen { left:0!important;top:0!important;width:100vw!important;height:100dvh!important;border-width:6px;border-radius:0;padding:8px 14px;box-shadow:none; }
+.crt-overlay:fullscreen { left:0!important;top:0!important;width:100vw!important;height:100dvh!important;border-width:6px;border-radius:18px;padding:8px 14px;box-shadow:inset 0 0 0 1px #dff0c52b; }
 .no-script { position:absolute;z-index:90;left:50%;top:50%;width:min(90%,430px);padding:25px;transform:translate(-50%,-50%);border:1px solid var(--phosphor);background:#111c13; }
 .no-script h1 { color:var(--phosphor);font-size:27px;line-height:1.1; }.no-script p { color:#a9b69a;font:12px/1.6 var(--mono); }
 
