@@ -1,7 +1,9 @@
 # Public tester releases
 
 Open **[Retro Arcade](https://lowo209.github.io/retro-arcade/)** in a browser,
-choose an available game, and click **Launch game**. No installation is needed.
+press **Start** to enter the cabinet, browse to an available game, and click
+**Play game**. Search, game information, controls and help are in the screen's
+menu. No installation is needed.
 Games and the emulator download from Cloudflare R2 and run on the visitor's
 device. First PlayStation downloads are roughly 500–750 MB, so allow a few
 minutes on slower connections. The library shows the current availability.

@@ -25,7 +25,11 @@ test('hosted build loads a static catalogue and external runtime beneath a Pages
   const result = buildHosted({ root, basePath: '/retro-arcade/', manifest: manifest() });
   assert.ok(result.files.includes('frame.html'));
   assert.ok(result.files.every(file => !/\.(bin|zip|data|wasm|jpe?g|png)$/.test(file)));
-  assert.match(fs.readFileSync(path.join(result.output, 'frame.html'), 'utf8'), /src="\/retro-arcade\/frame.js"/);
+  assert.ok(fs.readFileSync(path.join(result.output, 'frame.html'), 'utf8').includes(`src="/retro-arcade/frame.js?v=${result.release}"`));
+  assert.ok(result.files.includes('arcade-session.js'));
+  assert.ok(result.files.includes('arcade.css'));
+  assert.ok(fs.readFileSync(path.join(result.output, 'frame.js'), 'utf8').includes(`'./startup-diagnostics.js?v=${result.release}'`));
+  assert.ok(fs.readFileSync(path.join(result.output, 'arcade-session.js'), 'utf8').includes(`'./catalog.js?v=${result.release}'`));
   assert.match(fs.readFileSync(path.join(result.output, 'frame.html'), 'utf8'), /connect-src 'self' https:\/\/pub-example.r2.dev/);
   const catalog = await import(pathToFileURL(path.join(result.output, 'catalog.js')));
   assert.equal(catalog.IS_HOSTED, true); assert.equal(catalog.IS_PREVIEW, false);

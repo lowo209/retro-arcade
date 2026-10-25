@@ -1,21 +1,22 @@
-# Interactive hero cabinet
+# The arcade machine is the website
 
-The existing hero column now contains a procedural Three.js 0.180.0 cabinet. The charcoal/orange palette, typography, navigation and library keep their existing design. The supplied RE3 cover is installed unchanged at ignored `private/covers/re3.png`; the original RE3 illustration remains the source-only fallback.
+Press Start on the cabinet or press Enter. A camera move squares up to the CRT, then the real interactive website appears inside its display. The cover carousel, game player and menus all share this screen; there is no separate landing-page library.
 
-## Use the cabinet
+## Browse and play
 
-- Move a mouse over the surrounding space for a restrained view change. Hover and hold individual arcade buttons: each cap moves into its own housing. The view stays fixed while a control is held.
-- Drag the joystick ball. Travel is limited to a circular gate; releasing, cancelling a pointer or leaving the browser returns it to centre. Touch devices have a larger grip target; swiping elsewhere on the canvas can scroll the page.
-- Press the physical or HTML **START** button. The CRT powers up, checks its memory/controls and shows the library prompt. Clicking its screen follows the existing `#library` anchor. This is an interactive illustration, not an emulator or substitute game.
-- The **＋** button toggles a slightly closer camera. It starts off.
-- Open **Keyboard controls** for HTML alternatives to all four buttons and the joystick. Use Tab, Enter/Space and the joystick's arrow keys. The library link remains available without JavaScript or WebGL.
+- Click the arrows, scroll the cover rail, swipe, or use Left/Right to choose a game. Enter or Play Game launches it inside the CRT. Favorites keep their existing browser storage key.
+- The menu holds search, game information, keyboard layouts for each player, controller guidance, save instructions, graphics help, feedback and licenses. GT2 has separate Arcade and Simulation disc options.
+- A connected gamepad uses its D-pad or left stick to browse, A to select/play, X for favorites and Start for the menu. In the menu, directions move focus, A activates and B returns. Actual game input stays with the emulator and its saved mappings.
+- Back to Games unloads the iframe. Restart replaces it. The power button leaves the screen and pulls the camera back to the full cabinet. Existing game.html?id= links select the correct game in the cabinet and still require an explicit Start/play gesture.
 
-## Construction and lifecycle
+## Rendering and accessibility
 
-`public/arcade-cabinet.js` constructs extruded side panels with continuous edge trim, a lower enclosure, sloped deck, recessed tilted CRT with convex glass, marquee, speaker slots, fasteners, joystick, four separate lathed caps, START button, coin door and kick plate. The cabinet rests on a contact shadow. No model, generated image, external font or remote texture is needed. Text and restrained scanlines use local canvas textures.
+The procedural Three.js scene includes the cabinet shell, edge trim, lit marquee, speaker slots, fasteners, sloped control deck, movable joystick and individual buttons, coin door, contact shadow and arcade-room lights. It uses the pinned local Three.js distribution, canvas textures and existing artwork; no remote 3D model or font service is needed.
 
-Three.js is pinned in `public/lib/three/` with its MIT notice. No CDN or build step is required. Ray picking respects solid surfaces; labels inherit their parent control. Held controls never become cabinet-rotation gestures. Game bindings are separate: see [CONTROLS.md](CONTROLS.md).
+initArcadeCabinet exposes enter, exit, setScreenMode and dispose. Its onCamera callback reports the screen rectangle in stage-relative CSS pixels after rendering and on resize. The app places actual accessible HTML over the monitor after the camera settles. Portrait layouts expand this display into a usable framed CRT while keeping the cabinet behind it.
 
-Rendering wakes for input, resize, boot and settling, then stops when still. Pixel ratio is capped at 1.5, shadows use a 1024 texture and the CRT updates only when its content changes. Off-screen/hidden tabs pause. Reduced motion disables mouse-follow, animated boot and animated input transitions. Back/forward cache resumes the scene. Teardown releases animation frames, listeners, observers, textures, geometry, materials, shadow resources and the renderer. WebGL creation/context failure restores the static SVG and ordinary library link.
+Rendering is event-driven and settles to idle; the cabinet does not continuously animate beside an active emulator. Reduced motion skips camera travel. WebGL failure leaves the static cabinet and a working Start path into the same game browser. Menus contain focus, restore it on close, and make the covered browser/player inert. Browser keyboard shortcuts are inactive during gameplay.
 
-Actual test results and hardware limits are in [VERIFICATION.md](VERIFICATION.md).
+createArcadeSession owns a single iframe and accepts status only from that current, same-origin frame. Stop, replacement, restart, page exit and disposal remove the old frame. Save IDs, game files, BIOS and emulator bindings are unchanged. Build-time version queries keep the first-party module graph consistent after deployment; Three.js and R2 game assets retain their original URLs.
+
+See VERIFICATION.md for actual checks and hardware limits.
