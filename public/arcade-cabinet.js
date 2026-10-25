@@ -14,6 +14,7 @@ export function initArcadeCabinet(host, options = {}) {
   let renderer, touchStick, resizeObserver, intersectionObserver, disposed = false;
   let screenObject, unavailable = false, phase = 'attract', progress = 0, transition = null, screenMode = 'idle';
   let width = 1, height = 1;
+  let crtEnabled = options.crtEnabled !== false;
   let visible = true, frame = 0, lastTime = 0, hovered = null, active = null;
   let bootAt = null, powered = false, textureFrame = -1, message = '', messageUntil = 0;
   let focusControl = null, joystickX = 0, joystickY = 0;
@@ -83,6 +84,7 @@ export function initArcadeCabinet(host, options = {}) {
   const api = {
     enter:() => move(true), exit:() => move(false),
     setScreenMode(mode) { screenMode = ['idle','browser','playing'].includes(mode) ? mode : 'browser'; textureFrame = -1; wake(); },
+    setCrtEnabled(enabled) { if (disposed) return; crtEnabled = enabled !== false; textureFrame = -1; wake(); },
     dispose() { cleanup(); },
   };
   let cleanup = () => { disposed = true; events.abort(); resizeObserver?.disconnect(); intersectionObserver?.disconnect(); };
@@ -307,15 +309,16 @@ export function initArcadeCabinet(host, options = {}) {
         for(let x=-300;x<1100;x+=80){ctx.beginPath();ctx.moveTo(400,235);ctx.lineTo(x,500);ctx.stroke();}
         for(let y=300;y<500;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(800,y);ctx.stroke();}
         ctx.fillStyle='#82a28b';ctx.font='19px monospace';ctx.fillText('SYSTEM 01  /  ALL CLASSICS',400,60);
-        ctx.shadowColor='#d79150';ctx.shadowBlur=18;
+        ctx.shadowColor='#d79150';ctx.shadowBlur=crtEnabled?18:0;
         ctx.fillStyle='#f2bb78';ctx.font='900 108px monospace';ctx.fillText('RETRO',400,177);ctx.fillText('ARCADE',400,285);ctx.shadowBlur=0;
         ctx.fillStyle='#b9d0ab';ctx.font='bold 27px monospace';ctx.fillText(now<messageUntil?message:screenMode==='playing'?'GAME IN PROGRESS':powered?'SELECT YOUR GAME':'[ PRESS START ]',400,393);
         ctx.fillStyle='#78957a';ctx.font='16px monospace';ctx.fillText('NO QUARTERS REQUIRED',400,452);
       }
-      // Restrained glass reflection, edge vignette and static CRT scanlines.
-      const reflection=ctx.createLinearGradient(0,0,650,430);reflection.addColorStop(0,'#c9d6cf0e');reflection.addColorStop(.45,'#c9d6cf04');reflection.addColorStop(1,'#0000');ctx.fillStyle=reflection;ctx.fillRect(0,0,800,500);
-      ctx.fillStyle='#00000026';for(let y=0;y<500;y+=4)ctx.fillRect(0,y,800,1);
-      const vignette=ctx.createRadialGradient(400,250,150,400,250,460);vignette.addColorStop(0,'#0000');vignette.addColorStop(1,'#000b');ctx.fillStyle=vignette;ctx.fillRect(0,0,800,500);
+      if(crtEnabled){
+        const reflection=ctx.createLinearGradient(0,0,650,430);reflection.addColorStop(0,'#c9d6cf14');reflection.addColorStop(.45,'#c9d6cf04');reflection.addColorStop(1,'#0000');ctx.fillStyle=reflection;ctx.fillRect(0,0,800,500);
+        ctx.fillStyle='#00000038';for(let y=0;y<500;y+=4)ctx.fillRect(0,y,800,1);
+        const vignette=ctx.createRadialGradient(400,250,150,400,250,460);vignette.addColorStop(0,'#0000');vignette.addColorStop(1,'#000b');ctx.fillStyle=vignette;ctx.fillRect(0,0,800,500);
+      }
       screenMap.needsUpdate=true;
     }
     function pick(event) {

@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="/arcade.css">
   <script type="module" src="/app.js"></script>
 </head>
-<body class="arcade-site" data-view="attract">
+<body class="arcade-site" data-view="attract" data-crt="on">
   <a class="skip-link" href="#enter-arcade">Skip to Start</a>
   <main id="main" class="arcade-room">
     <div class="room-atmosphere" aria-hidden="true"><i></i><i></i><i></i><div class="room-floor"></div></div>
@@ -37,7 +37,7 @@
       <div id="session-container" hidden></div>
       <section id="arcade-menu" class="arcade-menu" role="dialog" aria-modal="true" aria-labelledby="menu-title" tabindex="-1" hidden>
         <div class="menu-header"><div><span class="screen-kicker">CABINET SYSTEM</span><h2 id="menu-title">PAUSE THE SCROLL.</h2></div><button id="close-menu" class="screen-icon" type="button" aria-label="Close arcade menu">×</button></div>
-        <div class="menu-layout"><nav class="menu-tabs" aria-label="Arcade menu"><button type="button" data-menu-tab="library" class="is-active" aria-pressed="true"><span>01</span> COLLECTION</button><button type="button" data-menu-tab="game" aria-pressed="false"><span>02</span> GAME INFO</button><button type="button" data-menu-tab="controls" aria-pressed="false"><span>03</span> CONTROLS</button><button type="button" data-menu-tab="help" aria-pressed="false"><span>04</span> HELP & SAVES</button><button type="button" data-menu-tab="about" aria-pressed="false"><span>05</span> ABOUT</button></nav><div id="menu-content" class="menu-content"></div></div>
+        <div class="menu-layout"><nav class="menu-tabs" aria-label="Arcade menu"><button type="button" data-menu-tab="library" class="is-active" aria-pressed="true"><span>01</span> COLLECTION</button><button type="button" data-menu-tab="game" aria-pressed="false"><span>02</span> GAME INFO</button><button type="button" data-menu-tab="controls" aria-pressed="false"><span>03</span> CONTROLS</button><button type="button" data-menu-tab="settings" aria-pressed="false"><span>04</span> SETTINGS</button><button type="button" data-menu-tab="help" aria-pressed="false"><span>05</span> HELP & SAVES</button><button type="button" data-menu-tab="about" aria-pressed="false"><span>06</span> ABOUT</button></nav><div id="menu-content" class="menu-content"></div></div>
         <div class="menu-footer"><span>ESC TO RETURN</span><button id="menu-resume" type="button">BACK TO THE ARCADE ↗</button></div>
       </section>
       <p id="arcade-feedback" class="screen-toast" role="status" aria-live="polite" hidden></p>

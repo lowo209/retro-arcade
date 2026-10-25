@@ -6,6 +6,7 @@ Press Start on the cabinet or press Enter. A camera move squares up to the CRT, 
 
 - Click the arrows, scroll the cover rail, swipe, or use Left/Right to choose a game. Enter or Play Game launches it inside the CRT. Favorites keep their existing browser storage key.
 - The menu holds search, game information, keyboard layouts for each player, controller guidance, save instructions, graphics help, feedback and licenses. GT2 has separate Arcade and Simulation disc options.
+- **Settings → CRT effect** switches the scanlines, phosphor texture, glass reflection and edge shading on or off. The rounded molded bezel remains visible in either mode, including fullscreen. The choice defaults on and is saved separately from favorites and game saves; blocked browser storage keeps the change for the current visit. It also controls the starting cabinet's painted CRT texture. The effect is static, with no flicker animation or extra render loop.
 - A connected gamepad uses its D-pad or left stick to browse, A to select/play, X for favorites and Start for the menu. In the menu, directions move focus, A activates and B returns. Actual game input stays with the emulator and its saved mappings.
 - Back to Games unloads the iframe. Restart replaces it. The power button leaves the screen and pulls the camera back to the full cabinet. Existing game.html?id= links select the correct game in the cabinet and still require an explicit Start/play gesture.
 

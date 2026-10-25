@@ -1,5 +1,11 @@
 # Verification log
 
+## 25 October 2026 — Saved CRT display setting
+
+- Added Menu → Settings → CRT effect, enabled by default. Static scanlines, a phosphor grille, reflection and edge shading cover the browser and games; disabling them retains the molded rounded bezel, including fullscreen. The starting cabinet texture follows the same preference. No flashing animation or continuous render loop was added.
+- The independent display preference survives reloads without changing favorites or game-save storage. Blocked storage is guarded and retains the choice for the current visit. Four focused preference tests join the existing suite: all 32 automated checks pass, together with source-boundary and hosted-build checks.
+- Built Pages output with actual R2 assets: checked on/off, keyboard Space, CRT-off persistence through reload, and toggling during a running UMK3 session. The game remained in the started state with one unchanged player iframe. CRT-off hid the effect layer while the 8 px rounded bezel remained visible. At 390×844, the switch and menu stayed inside the screen with no horizontal page overflow.
+
 ## 25 October 2026 — Interactive arcade-machine redesign
 
 - Replaced the landing-page library and separate game-detail flow with a full-viewport cabinet. Start moves the camera into the CRT; its actual HTML display contains a horizontal cover browser, filters, favorites, search, menus and the game iframe. Power returns to the full machine. Previously shared game links select their title in the cabinet and still require explicit entry/play.
