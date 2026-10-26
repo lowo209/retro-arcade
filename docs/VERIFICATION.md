@@ -1,5 +1,14 @@
 # Verification log
 
+## 26 October 2026 — Game-focused launcher and CRT monitor
+
+- Removed start-screen slogans, game descriptions, duplicate readiness labels and long in-screen explanations. Collection search and optional GT2 disc details remain. Settings contains Display, Controls and Saves & Help; longer instructions link to GitHub.
+- Gameplay fills a charcoal molded monitor with rounded inner glass, static scanlines, phosphor texture, reflection and edge shading. Game colors are preserved. A small floating icon dock provides Back, Settings, Restart and Fullscreen. Running status text disappears after startup; loading and errors remain visible. The existing saved CRT switch still removes only the effect layer.
+- Built Pages output at `/retro-arcade/` with the real R2 release. UMK3 reached started state and rendered its original title/attract screen. Switching the effect retained one unchanged iframe; Back removed it. Fullscreen preserved the bezel and restored iframe focus. Search found GT2 and its compact details retained Arcade and Simulation options. These are integration checks, not new full-game, audio or physical-controller certification.
+- Checked 1280×800 desktop and 390×844 portrait layouts. The portrait Settings panel stayed within the viewport with no horizontal page overflow; Display and P2 Controls were usable. Pointer-based portrait gameplay uses a centered monitor; touch layouts retain room for the emulator's own virtual controls. Real touch hardware was not tested.
+- All 33 automated checks pass, including a new regression check that running gameplay hides status while loading/failures remain visible. Syntax, source publication boundaries and the hosted build pass. No game bytes, BIOS, R2 objects, save IDs or emulator mappings changed.
+- Read-only file audit confirmed independent installed archives for all seven playable games, both GT2 discs and BIOS, and fresh successful public size checks for those R2 files. Downloads originals for the installed arcade/PS1 games are no longer required. The GT4 ISO is still referenced directly from Downloads and has no installed or R2 copy; retain it for future GT4 work. No files were deleted.
+
 ## 25 October 2026 — Saved CRT display setting
 
 - Added Menu → Settings → CRT effect, enabled by default. Static scanlines, a phosphor grille, reflection and edge shading cover the browser and games; disabling them retains the molded rounded bezel, including fullscreen. The starting cabinet texture follows the same preference. No flashing animation or continuous render loop was added.
