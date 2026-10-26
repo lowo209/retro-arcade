@@ -1,10 +1,13 @@
 # Retro Arcade
 
 **The cabinet is the website.** Press **Start** to zoom into its CRT, browse the
-cover carousel, and play inside the same screen. Arrows, mouse wheel, touch and
-gamepad navigate the collection. Search, game information, both GT2 discs,
-controls, saves and help live in the in-screen menu. The power button pulls back
-to the full machine. Previously shared game links still select the right game.
+cover carousel, and press **Play**. Arrows, mouse wheel, touch and gamepad navigate
+the collection. Gameplay fills a rounded CRT monitor with a molded bezel and a
+small icon dock for Back, Settings, Restart and Fullscreen. **Settings → Display**
+toggles the saved CRT effect; **Settings → Controls** shows each player's keys.
+Search and both GT2 discs remain available from the collection and game details.
+The power button pulls back to the full machine. Previously shared game links
+still select the right game. Further instructions live here on GitHub.
 
 **Playable tester release:** seven games are available from the public link: UMK3, Need for Speed: High Stakes, Gran Turismo 2, Resident Evil 3, Ace Combat 3, Ghost in the Shell and G-Police: Weapons of Justice. GT2 includes separate Arcade and Simulation launches. Games download from Cloudflare R2 and run in the browser; the cabinet, search, filters, favorites and control guides are included.
 
@@ -42,9 +45,16 @@ The hero controls and implementation are described in [CABINET.md](docs/CABINET.
    npm start
    ```
 
-5. Open **http://127.0.0.1:3000** in Chrome. Choose a game and click **Launch game**. If Chrome asks for a second interaction to unlock audio, click inside the emulator or its Start button. Keep the terminal open. **Ctrl+C** stops the server.
+5. Open **http://127.0.0.1:3000** in Chrome. Press **Start**, choose a game and press **Play**. If Chrome asks for a second interaction to unlock audio, click inside the emulator or its Start button. Keep the terminal open. **Ctrl+C** stops the server.
 
 Use that exact address and port every time so browser saves stay in the same storage. Do not double-click `index.html`, use `file://`, or replace this server with VS Code Live Server: the local API, private mounts, WebAssembly MIME types, HTTP Range requests and cross-origin isolation are supplied by `server.mjs`. Once the files are installed, Internet access is unnecessary; the local server still needs to be running.
+
+Installed arcade and PS1 games are independent copies under `private/roms`, with
+firmware under `private/bios`; their original download archives are no longer
+runtime dependencies. Keep those installed folders and `vendor` for local play.
+GT4 is different: its ignored local configuration can reference an ISO outside
+the project. Keep or back up that ISO for future GT4 builds. The public tester
+release reads its verified game files from R2.
 
 ## Current game status
 

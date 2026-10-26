@@ -149,7 +149,8 @@ test('GT2 Simulation selects its independent disc and carries the deployed versi
   assert.equal(f.session.current.variant, 'simulation');
   f.message({ phase: 'started', message: 'Game running' });
   assert.equal(f.timers.size, 0);
-  assert.ok(f.container.find(element => element.textContent === 'Simulation disc · separate saves'));
+  assert.equal(f.container.find(element => element.className === 'arcade-session-footer').hidden, true);
+  assert.equal(f.container.find(element => element.className === 'arcade-session-note').hidden, true);
   f.session.dispose();
 });
 
@@ -238,5 +239,21 @@ test('graphics failures preserve the real error and expose help without navigati
   const help = f.container.find(element => element.textContent === 'Graphics help ↗');
   assert.equal(help.href, '/retro-arcade/guides/browser.html');
   assert.equal(help.target, '_blank');
+  f.session.dispose();
+});
+
+test('loading and failure status remain visible but running gameplay has no status panel', () => {
+  const f = fixture();
+  f.session.start(game('umk3'), { ready: true });
+  const first = f.session.frame;
+  const panel = f.container.find(element => element.className === 'arcade-session-footer');
+  assert.equal(panel.hidden, false);
+  f.message({ phase: 'started', message: 'Emulator running' });
+  assert.equal(panel.hidden, true);
+  assert.equal(f.session.frame, first);
+  assert.equal(f.frames().length, 1);
+  f.message({ phase: 'error', message: 'The renderer stopped.' });
+  assert.equal(panel.hidden, false);
+  assert.ok(f.container.find(element => element.textContent === 'The renderer stopped.'));
   f.session.dispose();
 });

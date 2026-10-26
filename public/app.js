@@ -8,14 +8,16 @@ const screen = $('#cabinet-screen'), browser = $('#browser-panel'), rail = $('#g
 const menu = $('#arcade-menu'), sessionHost = $('#session-container');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const favoriteKey = 'retro-arcade-favorites-v1';
+const githubUrl = 'https://github.com/lowo209/retro-arcade';
 const requestedGame = new URLSearchParams(location.search).get('game');
 let selectedId = GAMES.some(g => g.id === requestedGame) ? requestedGame : GAMES[0].id;
 let library = null, libraryError = '', filter = 'all', search = '', visibleGames = [...GAMES];
 let favorites = new Set(), view = 'attract', menuTab = 'library', controlPlayer = 1;
+let settingsTab = 'display';
 let menuFocus = null, menuAfterEnter = null, scrollTimer = null, toastTimer = null;
 let cabinet, entering = false, gamepadTimer = null, padPrevious = new Set(), padRepeat = 0;
 let displaySettings = loadDisplaySettings();
-let displaySettingsStatus = 'Display preference for this browser.';
+let displaySettingsStatus = '';
 document.body.dataset.crt = displaySettings.crtEnabled ? 'on' : 'off';
 try { const saved = JSON.parse(localStorage.getItem(favoriteKey) || '[]'); if (Array.isArray(saved)) favorites = new Set(saved.filter(id => GAMES.some(g => g.id === id))); } catch { /* Storage is optional. */ }
 const selectedGame = () => GAMES.find(g => g.id === selectedId) || GAMES[0];
@@ -34,7 +36,7 @@ function setView(next) {
   $('.attract-start').inert = next !== 'attract';
   const playing = next === 'playing'; browser.hidden = playing; sessionHost.hidden = !playing;
   $('#open-search').hidden = playing;
-  if (next === 'browser') $('#system-label').textContent = 'SYSTEM READY';
+  if (next === 'browser') $('#system-label').textContent = 'READY';
   if (next === 'attract') { screen.hidden = true; screen.inert = true; }
   else if (next === 'browser' || playing) { screen.hidden = false; screen.inert = false; }
   cabinet?.setScreenMode(playing ? 'playing' : next === 'attract' ? 'idle' : 'browser');
@@ -59,9 +61,9 @@ function leaveArcade() {
 }
 const session = createArcadeSession(sessionHost, {
   fullscreenTarget: screen,
-  onExit() { setView('browser'); centerSelected(false); $('#launch-game').focus({ preventScroll: true }); $('#system-label').textContent = 'SYSTEM READY'; },
+  onExit() { setView('browser'); centerSelected(false); $('#launch-game').focus({ preventScroll: true }); $('#system-label').textContent = 'READY'; },
   onMenu() { openMenu('controls'); },
-  onStatus({ phase }) { $('#system-label').textContent = phase === 'started' ? 'GAME RUNNING' : phase === 'error' ? 'CHECK CONNECTION' : 'LOADING GAME'; },
+  onStatus({ phase }) { $('#system-label').textContent = phase === 'started' ? 'PLAYING' : phase === 'error' ? 'ERROR' : 'LOADING'; },
 });
 cabinet = initArcadeCabinet($('#arcade-cabinet'), {
   crtEnabled: displaySettings.crtEnabled,
@@ -104,26 +106,26 @@ function renderSelection() {
   $('#selection-position').textContent = index < 0 ? '00' : String(index + 1).padStart(2, '0');
   $('#selection-total').textContent = String(visibleGames.length).padStart(2, '0');
   $('#selected-game').hidden = !visibleGames.length;
-  $('#selected-title').textContent = game.title; $('#selected-tagline').textContent = game.description;
-  $('#selected-meta').innerHTML = `<span>${esc(game.platform)}</span><i>·</i><span>${esc(game.year)}</span><i>·</i><span>${esc(game.genre)}</span><i>·</i><span>${esc(game.players)}</span>`;
+  $('#selected-title').textContent = game.title;
+  $('#selected-meta').innerHTML = `<span>${esc(game.platform)}</span><i>·</i><span>${esc(game.year)}</span><i>·</i><span>${esc(game.players)}</span>`;
   const favoriteButton = $('#toggle-favorite'); favoriteButton.textContent = favorite ? '♥' : '♡';
   favoriteButton.classList.toggle('is-favorite', favorite); favoriteButton.setAttribute('aria-pressed', String(favorite));
   favoriteButton.setAttribute('aria-label', `${favorite ? 'Remove' : 'Add'} ${game.title} ${favorite ? 'from' : 'to'} favorites`);
   const ready = state?.ready && !game.experimental;
   $('#launch-game').disabled = !library || !!libraryError;
   $('#launch-game').classList.toggle('is-unavailable', !ready);
-  $('#launch-label').textContent = !library ? 'CONNECTING' : IS_PREVIEW ? 'PREVIEW' : ready ? 'PLAY GAME' : 'GAME INFO';
+  $('#launch-label').textContent = !library ? 'LOADING' : IS_PREVIEW ? 'PREVIEW' : ready ? 'PLAY' : 'DETAILS';
   $('#launch-game').setAttribute('aria-label', `${ready ? 'Play' : 'View information for'} ${game.title}`);
   screen.style.setProperty('--selected-cover', `url("${coverFor(game)}")`);
-  if (isMenuOpen() && (menuTab === 'game' || menuTab === 'controls')) renderMenu();
+  if (isMenuOpen() && (menuTab === 'game' || menuTab === 'settings')) renderMenu();
 }
 function renderLibrary({ center = true } = {}) {
   visibleGames = GAMES.filter(game => (filter === 'all' || filter === game.platform || filter === 'favorites' && favorites.has(game.id)) && `${game.title} ${game.genre} ${game.platform}`.toLowerCase().includes(search.toLowerCase()));
   if (!visibleGames.some(g => g.id === selectedId) && visibleGames.length) selectedId = visibleGames[0].id;
   rail.innerHTML = visibleGames.map(game => {
     const state = stateFor(game.id), selected = game.id === selectedId;
-    const status = IS_PREVIEW ? 'PREVIEW' : game.experimental ? 'COMING LATER' : state?.ready ? 'READY TO PLAY' : library ? 'UNAVAILABLE' : 'CONNECTING';
-    return `<div class="game-slot" role="listitem"><button type="button" class="game-tile ${selected ? 'is-selected' : ''} ${state?.ready ? 'is-ready' : ''}" data-game="${game.id}" aria-pressed="${selected}" aria-label="Select ${esc(game.title)}" tabindex="${selected ? '0' : '-1'}"><span class="tile-index">${String(GAMES.indexOf(game) + 1).padStart(2, '0')}</span><span class="tile-cover"><img src="${esc(coverFor(game))}" alt="${esc(game.title)} cover" width="300" height="360"><span class="tile-platform">${icon(game.platform)}</span><span class="tile-favorite" ${favorites.has(game.id) ? '' : 'hidden'}>♥</span><span class="tile-shine"></span></span><span class="tile-caption"><span>${esc(game.short)}</span><small><i></i>${status}</small></span></button></div>`;
+    const status = IS_PREVIEW ? 'PREVIEW' : game.experimental ? 'SOON' : state?.ready ? '' : library ? 'UNAVAILABLE' : 'LOADING';
+    return `<div class="game-slot" role="listitem"><button type="button" class="game-tile ${selected ? 'is-selected' : ''} ${state?.ready ? 'is-ready' : ''}" data-game="${game.id}" aria-pressed="${selected}" aria-label="Select ${esc(game.title)}${status ? ` — ${status.toLowerCase()}` : ''}" tabindex="${selected ? '0' : '-1'}"><span class="tile-cover"><img src="${esc(coverFor(game))}" alt="${esc(game.title)} cover" width="300" height="360"><span class="tile-platform">${icon(game.platform)}</span><span class="tile-favorite" ${favorites.has(game.id) ? '' : 'hidden'}>♥</span><span class="tile-shine"></span></span><span class="tile-caption"><span>${esc(game.short)}</span>${status ? `<small>${status}</small>` : ''}</span></button></div>`;
   }).join('');
   $('#empty-results').hidden = visibleGames.length > 0;
   $('#empty-message').textContent = search ? `Nothing matches “${search}”.` : filter === 'favorites' ? 'Your favorite games will appear here.' : 'No games in this selection.';
@@ -131,13 +133,12 @@ function renderLibrary({ center = true } = {}) {
   $('#favorites-count').textContent = favorites.size;
   for (const button of document.querySelectorAll('[data-filter]')) { const active = button.dataset.filter === filter; button.classList.toggle('is-active', active); button.setAttribute('aria-pressed', String(active)); }
   const ready = library?.games?.filter(g => g.ready && !g.experimental).length || 0;
-  $('#library-status').textContent = libraryError ? 'CONNECTION LOST — MENU TO RETRY' : !library ? 'CONNECTING TO LIBRARY' : IS_PREVIEW ? 'INTERFACE PREVIEW' : `${ready} READY / ${GAMES.length} CLASSICS`;
-  $('#room-library-count').textContent = `${String(GAMES.length).padStart(2, '0')} ORIGINAL CLASSICS`;
+  $('#library-status').textContent = libraryError ? 'Connection lost. Open Collection to retry.' : !library ? 'Loading games…' : IS_PREVIEW ? 'Preview' : `${ready} games ready`;
   renderSelection(); if (center) requestAnimationFrame(() => centerSelected(false));
 }
 async function refreshLibrary() {
   libraryError = ''; $('#room-status').textContent = 'CONNECTING';
-  try { library = await loadLibrary(); $('#room-status').textContent = IS_PREVIEW ? 'PREVIEW CABINET' : 'CABINET ONLINE'; }
+  try { library = await loadLibrary(); $('#room-status').textContent = IS_PREVIEW ? 'PREVIEW' : 'ONLINE'; }
   catch (error) { libraryError = error.message || 'The library is unavailable.'; $('#room-status').textContent = 'CONNECTION LOST'; toast('Library unavailable. Open the menu to retry.'); }
   renderLibrary(); if (isMenuOpen()) renderMenu();
 }
@@ -162,11 +163,13 @@ function controlLabel(control, id) {
 }
 function menuGame() { return inSession() && session.current?.game || selectedGame(); }
 function openMenu(tab = 'library') {
+  if (tab === 'controls') { tab = 'settings'; settingsTab = 'controls'; }
+  if (tab === 'help' || tab === 'about') { tab = 'settings'; settingsTab = 'saves'; }
   if (view === 'attract' || view === 'entering') { menuAfterEnter = tab; if (view === 'attract') enterArcade(); return; }
   if (menu.hidden) menuFocus = document.activeElement;
   menuTab = tab; menu.hidden = false; $('#open-menu').setAttribute('aria-expanded', 'true');
   browser.inert = true; sessionHost.inert = true; $('.screen-system-bar').inert = true; $('.room-hud').inert = true; renderMenu();
-  (tab === 'library' ? $('#search') : menu.querySelector(`[data-menu-tab="${tab}"]`))?.focus({ preventScroll: true });
+  (tab === 'library' ? $('#search') : menu.querySelector(`[data-menu-tab="${tab}"]`) || $('#close-menu'))?.focus({ preventScroll: true });
 }
 function closeMenu({ restore = true } = {}) {
   if (menu.hidden) return;
@@ -177,20 +180,24 @@ function renderMenu() {
   for (const button of menu.querySelectorAll('[data-menu-tab]')) { const active = button.dataset.menuTab === menuTab; button.classList.toggle('is-active', active); button.setAttribute('aria-pressed', String(active)); }
   const game = menuGame(), state = stateFor(game.id), content = $('#menu-content');
   if (game.singlePlayer) controlPlayer = 1;
-  $('#menu-title').textContent = ({ library: 'FIND YOUR NEXT ROUND.', game: 'THE ORIGINAL GAME.', controls: 'KNOW YOUR MOVES.', settings: 'TUNE YOUR DISPLAY.', help: 'KEEP THE GAME GOING.', about: 'BUILT FOR THE CLASSICS.' })[menuTab];
-  if (menuTab === 'library') content.innerHTML = `<p class="menu-eyebrow">SEARCH THE COLLECTION</p><label class="console-search"><span aria-hidden="true">⌕</span><input type="search" id="search" placeholder="Type a game, genre or platform…" aria-label="Search games" value="${esc(search)}" autocomplete="off"></label><div id="search-results" class="menu-results"></div>${search ? '<button type="button" class="menu-text-button" data-menu-action="clear-search">CLEAR SEARCH ×</button>' : ''}<div class="menu-divider"></div><button type="button" class="menu-text-button" data-menu-action="refresh">↻ REFRESH LIBRARY</button>${libraryError ? `<p class="menu-warning">${esc(libraryError)}</p>` : ''}`;
+  $('#menu-resume').textContent = inSession() ? 'RESUME ↗' : 'BACK ↗';
+  $('#menu-title').textContent = ({ library: 'COLLECTION', game: game.short, settings: 'SETTINGS' })[menuTab];
+  if (menuTab === 'library') {
+    content.innerHTML = `<label class="console-search"><span aria-hidden="true">⌕</span><input type="search" id="search" placeholder="Search games…" aria-label="Search games" value="${esc(search)}" autocomplete="off"></label><div id="search-results" class="menu-results"></div>${search ? '<button type="button" class="menu-text-button" data-menu-action="clear-search">CLEAR ×</button>' : ''}${libraryError ? `<p class="menu-warning">${esc(libraryError)}</p><button type="button" class="menu-text-button" data-menu-action="refresh">↻ RETRY</button>` : ''}`;
+    renderSearchResults();
+  }
   if (menuTab === 'game') {
     const ready = state?.ready && !game.experimental;
-    const description = game.long.replace('The supplied ', 'The ').replace('Your supplied US PlayStation disc is installed locally. ', '').replace('running locally through', 'running through').replace('The PC edition is kept separate.', '');
-    content.innerHTML = `<p class="menu-eyebrow">${esc(game.platform)} / ${esc(game.year)} / ${esc(game.players)}</p><h3>${esc(game.title)}</h3><p>${esc(description)}</p><div class="menu-tag-row"><span>${esc(game.genre)}</span><span>${ready ? 'READY TO PLAY' : IS_PREVIEW ? 'INTERFACE PREVIEW' : game.experimental ? 'COMING LATER' : 'UNAVAILABLE'}</span>${state?.downloadBytes ? `<span>${Math.ceil(state.downloadBytes / 1e6)} MB DOWNLOAD</span>` : ''}</div>${!ready ? `<p class="menu-warning">${esc(IS_PREVIEW ? 'This build previews the cabinet. Game playback is not enabled.' : state?.reason || game.missing)}</p>` : ''}${!IS_HOSTED && !IS_PREVIEW && !ready ? `<code class="menu-file">${esc(game.filename)}</code>` : ''}${game.id === 'gt2' && state?.alternate?.ready ? '<div class="disc-options"><span class="menu-eyebrow">CHOOSE YOUR DISC</span><button type="button" data-menu-action="play">▶ ARCADE DISC <small>European · split-screen</small></button><button type="button" data-menu-action="simulation">▶ SIMULATION DISC <small>US · separate saves</small></button></div>' : ready ? '<button type="button" class="menu-play-button" data-menu-action="play">PLAY THIS GAME ▶</button>' : ''}<p class="menu-fine">Availability checks confirm the files. Compatibility can vary by game and device.</p>`;
+    content.innerHTML = `<p class="menu-eyebrow">${esc(game.platform)} / ${esc(game.year)} / ${esc(game.players)}</p><h3>${esc(game.title)}</h3><div class="menu-tag-row"><span>${esc(game.genre)}</span>${state?.downloadBytes ? `<span>${Math.ceil(state.downloadBytes / 1e6)} MB</span>` : ''}</div>${!ready ? `<p class="menu-warning">${esc(IS_PREVIEW ? 'Preview only. Playback is disabled.' : state?.reason || game.missing)}</p>` : ''}${!IS_HOSTED && !IS_PREVIEW && !ready ? `<code class="menu-file">${esc(game.filename)}</code>` : ''}${game.id === 'gt2' && state?.alternate?.ready ? '<div class="disc-options"><button type="button" data-menu-action="play">▶ ARCADE <small>European · split-screen</small></button><button type="button" data-menu-action="simulation">▶ SIMULATION <small>US · separate saves</small></button></div>' : ready ? '<button type="button" class="menu-play-button" data-menu-action="play">PLAY ▶</button>' : ''}<button type="button" class="menu-text-button" data-menu-action="controls">CONTROLS ↗</button>`;
   }
-  if (menuTab === 'controls') {
-    content.innerHTML = `<p class="menu-eyebrow">${esc(game.short)} / KEYBOARD & GAMEPAD</p><div class="control-player-switch"><button type="button" data-control-player="1" aria-pressed="${controlPlayer === 1}" class="${controlPlayer === 1 ? 'is-active' : ''}">PLAYER 1</button>${!game.singlePlayer ? `<button type="button" data-control-player="2" aria-pressed="${controlPlayer === 2}" class="${controlPlayer === 2 ? 'is-active' : ''}">PLAYER 2</button>` : ''}</div><div class="console-controls">${controlsForGame(game.id).map(control => `<div><span>${esc(controlLabel(control, game.id))}</span><kbd>${esc(keyLabel(control[`p${game.singlePlayer ? 1 : controlPlayer}`]))}</kbd></div>`).join('')}</div><p>${game.id === 'nfs' || game.id === 'gt2' ? 'W is throttle and confirm. I/K move up and down in menus. ' : game.id === 're3' ? 'RE3 uses the original tank controls: forward follows Jill’s direction. ' : ''}Click inside the game before using the keyboard. Saved emulator mappings take priority; use Controls → Reset to adopt these defaults.</p><h3>BRING A CONTROLLER.</h3><p>Connect a USB or Bluetooth gamepad, press a button, then assign it in the emulator’s Controls menu. Two-player games run on the same device.</p><div class="menu-divider"></div><p class="menu-eyebrow">BROWSING THE CABINET</p><p>← / → browse · Enter plays · F favorites · / searches · Esc opens the menu. Gamepad: D-pad / left stick browse, A plays, X favorites, Start opens the menu.</p>`;
+  if (menuTab === 'settings') {
+    const tabs = `<div class="settings-tabs" role="group" aria-label="Settings section">${[['display', 'DISPLAY'], ['controls', 'CONTROLS'], ['saves', 'SAVES & HELP']].map(([id, label]) => `<button type="button" data-settings-tab="${id}" aria-pressed="${settingsTab === id}" class="${settingsTab === id ? 'is-active' : ''}">${label}</button>`).join('')}</div>`;
+    let panel = '';
+    if (settingsTab === 'display') panel = `<label class="display-setting" for="crt-effect"><span class="display-setting-copy"><strong>CRT effect</strong><small id="crt-effect-description">Scanlines & glass texture</small></span><span class="display-setting-toggle"><input type="checkbox" role="switch" id="crt-effect" aria-describedby="crt-effect-description" ${displaySettings.crtEnabled ? 'checked' : ''}><span aria-hidden="true"></span></span></label><p class="display-settings-status" id="display-settings-status" role="status" aria-live="polite">${esc(displaySettingsStatus)}</p>`;
+    if (settingsTab === 'controls') panel = `<p class="menu-eyebrow">${esc(game.short)}</p><div class="control-player-switch"><button type="button" data-control-player="1" aria-pressed="${controlPlayer === 1}" class="${controlPlayer === 1 ? 'is-active' : ''}">PLAYER 1</button>${!game.singlePlayer ? `<button type="button" data-control-player="2" aria-pressed="${controlPlayer === 2}" class="${controlPlayer === 2 ? 'is-active' : ''}">PLAYER 2</button>` : ''}</div><div class="console-controls">${controlsForGame(game.id).map(control => `<div><span>${esc(controlLabel(control, game.id))}</span><kbd>${esc(keyLabel(control[`p${game.singlePlayer ? 1 : controlPlayer}`]))}</kbd></div>`).join('')}</div>${game.id === 're3' ? '<p class="menu-fine">Tank controls: forward follows Jill’s direction.</p>' : ''}<p class="menu-fine">Click the game to use your keyboard. For a gamepad, connect it and assign it in the emulator’s Controls menu. Saved mappings take priority.</p><details class="settings-details"><summary>Launcher shortcuts</summary><p>← → browse · Enter plays · F favorites · / searches · Esc opens Settings.<br>Gamepad: D-pad / stick browse · A plays · X favorites · Start opens Settings.</p></details>`;
+    if (settingsTab === 'saves') panel = `<p>Save, load and export from the game’s toolbar. Saves stay in this browser; export a backup before clearing browser data.</p>${game.id === 'umk3' ? '<p class="menu-warning">UMK3 save states are unavailable.</p>' : ''}<a class="menu-link" href="${githubUrl}#readme" target="_blank" rel="noopener noreferrer">HOW IT WORKS ↗</a><a class="menu-link" href="${siteUrl('guides/browser.html')}" target="_blank" rel="noopener noreferrer">PICTURE & SOUND HELP ↗</a>${FEEDBACK_URL ? `<a class="menu-link" href="${esc(FEEDBACK_URL)}" target="_blank" rel="noopener noreferrer">REPORT A PROBLEM ↗</a>` : ''}<a class="menu-link" href="${siteUrl('software.html')}" target="_blank" rel="noopener noreferrer">LICENSES ↗</a>`;
+    content.innerHTML = tabs + panel + (inSession() ? '<div class="settings-session-actions"><button type="button" class="menu-text-button" data-menu-action="back">← GAMES</button><button type="button" class="menu-text-button" data-menu-action="restart">↻ RESTART</button><button type="button" class="menu-text-button" data-menu-action="fullscreen">⛶ FULLSCREEN</button></div>' : '');
   }
-  if (menuTab === 'settings') content.innerHTML = `<p class="menu-eyebrow">DISPLAY / PICTURE</p><h3>THAT CLASSIC CRT LOOK.</h3><label class="display-setting" for="crt-effect"><span class="display-setting-copy"><strong>CRT effect</strong><small>Scanlines, phosphor texture and glass shading</small></span><span class="display-setting-toggle"><input type="checkbox" role="switch" id="crt-effect" aria-describedby="crt-effect-description" ${displaySettings.crtEnabled ? 'checked' : ''}><span aria-hidden="true"></span></span></label><p id="crt-effect-description">Applies to the game browser and gameplay. Switch it off for a cleaner picture; the rounded arcade bezel stays in place.</p><p class="display-settings-status" id="display-settings-status" role="status" aria-live="polite">${esc(displaySettingsStatus)}</p>`;
-  if (menuTab === 'help') content.innerHTML = `<p class="menu-eyebrow">A FEW THINGS TO KEEP YOU PLAYING</p><h3>FIRST ROUND? GIVE IT A MINUTE.</h3><p>${IS_HOSTED ? 'PlayStation discs are large downloads, roughly 500–750 MB. Keep the game open while its first download finishes. Nothing needs installing.' : IS_PREVIEW ? 'This is an interface preview. Explore the machine, carousel, favorites and menus; playback is disabled.' : 'The installed games run from your computer. Keep the local server running while you play.'}</p><h3>YOUR SAVES STAY WITH YOU.</h3><p>Use the emulator toolbar to save, load and export backups. Saves stay in this browser profile at this website address. Local saves do not automatically transfer to the public site. Export before clearing browser data.</p><p class="menu-warning">UMK3 save states are unavailable in this core. Do not rely on persistent arcade progress.</p><h3>NO PICTURE OR SOUND?</h3><p>Click inside the game, check the emulator volume and allow site audio. For graphics errors, enable browser hardware acceleration and restart the browser.</p><a class="menu-link" href="${siteUrl('guides/browser.html')}" target="_blank" rel="noopener noreferrer">BROWSER GRAPHICS HELP ↗</a>${FEEDBACK_URL ? `<a class="menu-link" href="${esc(FEEDBACK_URL)}" target="_blank" rel="noopener noreferrer">REPORT A PROBLEM ↗</a>` : ''}<button type="button" class="menu-text-button" data-menu-action="refresh">↻ RECHECK LIBRARY</button>`;
-  if (menuTab === 'about') content.innerHTML = `<span class="about-emblem" aria-hidden="true">R↗</span><p class="menu-eyebrow">ONE CABINET. ALL YOUR CLASSICS.</p><h3>RETRO ARCADE</h3><p>A little corner of the arcade, built around the original games. Step up, pick a classic, and go for one more round.</p><p>${IS_HOSTED ? 'The tester cabinet downloads games from Cloudflare R2. Emulation runs on your device. No account, analytics or automatic feedback upload.' : 'Your games run on your device. Favorites and saves stay in your browser.'}</p><p>Game names, artwork and software retain their respective ownership and licenses.</p>${IS_HOSTED ? `<a class="menu-link" href="${siteUrl('software.html')}" target="_blank" rel="noopener noreferrer">EMULATOR LICENSES & SOURCE ↗</a>` : ''}${FEEDBACK_URL ? `<a class="menu-link" href="${esc(FEEDBACK_URL)}" target="_blank" rel="noopener noreferrer">SEND TESTER FEEDBACK ↗</a>` : ''}`;
-  if (menuTab === 'library') renderSearchResults();
 }
 function renderSearchResults() {
   const target = $('#search-results'); if (!target) return;
@@ -199,12 +206,12 @@ function renderSearchResults() {
 }
 
 $('#enter-arcade').addEventListener('click', enterArcade);
-$('#room-help').addEventListener('click', () => openMenu('help'));
+$('#room-help').addEventListener('click', () => openMenu('settings'));
 $('#leave-arcade').addEventListener('click', leaveArcade);
-$('#open-menu').addEventListener('click', () => openMenu('library'));
+$('#open-menu').addEventListener('click', () => openMenu('settings'));
 $('#open-search').addEventListener('click', () => openMenu('library'));
 $('#selected-info').addEventListener('click', () => openMenu('game'));
-$('#browse-controls').addEventListener('click', () => openMenu('controls'));
+$('#browse-controls').addEventListener('click', () => openMenu('settings'));
 $('#launch-game').addEventListener('click', () => launch());
 $('#toggle-favorite').addEventListener('click', toggleFavorite);
 $('#previous-game').addEventListener('click', () => moveSelection(-1));
@@ -231,14 +238,19 @@ menu.addEventListener('change', event => {
   document.body.dataset.crt = displaySettings.crtEnabled ? 'on' : 'off';
   cabinet.setCrtEnabled(displaySettings.crtEnabled);
   const persisted = saveDisplaySettings(displaySettings);
-  displaySettingsStatus = persisted ? 'Saved for this browser.' : 'Changed for this visit. Browser storage is unavailable.';
+  displaySettingsStatus = persisted ? 'Saved.' : 'This visit only. Browser storage is unavailable.';
   $('#display-settings-status').textContent = displaySettingsStatus;
 });
 menu.addEventListener('click', event => {
   const tab = event.target.closest('[data-menu-tab]'); if (tab) { menuTab = tab.dataset.menuTab; renderMenu(); return; }
+  const settings = event.target.closest('[data-settings-tab]'); if (settings) { settingsTab = settings.dataset.settingsTab; renderMenu(); menu.querySelector(`[data-settings-tab="${settingsTab}"]`)?.focus({ preventScroll: true }); return; }
   const player = event.target.closest('[data-control-player]'); if (player) { controlPlayer = Number(player.dataset.controlPlayer); renderMenu(); menu.querySelector(`[data-control-player="${controlPlayer}"]`)?.focus({ preventScroll: true }); return; }
   const result = event.target.closest('[data-search-game]'); if (result) { if (inSession()) { session.stop(); setView('browser'); } selectedId = result.dataset.searchGame; search = ''; filter = 'all'; renderLibrary(); closeMenu(); centerSelected(false); return; }
   const action = event.target.closest('[data-menu-action]')?.dataset.menuAction;
+  if (action === 'controls') openMenu('controls');
+  if (action === 'back') { closeMenu({ restore: false }); session.stop({ notify: true }); }
+  if (action === 'restart') { closeMenu({ restore: false }); session.restart(); }
+  if (action === 'fullscreen') { closeMenu({ restore: false }); session.fullscreen().then(() => session.focus()); }
   if (action === 'play') launch();
   if (action === 'simulation') launch('simulation');
   if (action === 'refresh') refreshLibrary();
@@ -249,7 +261,7 @@ document.addEventListener('keydown', event => {
   if (isMenuOpen()) {
     if (event.key === 'Escape') { event.preventDefault(); closeMenu(); }
     if (event.key === 'Tab') {
-      const focusable = [...menu.querySelectorAll('button:not(:disabled), input, a[href], [tabindex="0"]')].filter(el => !el.hidden && el.getClientRects().length);
+      const focusable = [...menu.querySelectorAll('button:not(:disabled), input, a[href], summary, [tabindex="0"]')].filter(el => !el.hidden && el.getClientRects().length);
       const first = focusable[0], last = focusable.at(-1);
       if (event.shiftKey && (document.activeElement === first || document.activeElement === menu)) { event.preventDefault(); last?.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
@@ -261,7 +273,7 @@ document.addEventListener('keydown', event => {
   if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); moveSelection(event.key === 'ArrowLeft' ? -1 : 1, { focus: true }); }
   if (event.key === 'Enter' && (!event.target.closest('button, a') || event.target.closest('[data-game]'))) { event.preventDefault(); launch(); }
   if (event.key.toLowerCase() === 'f') { event.preventDefault(); toggleFavorite(); }
-  if (event.key === '/' || event.key === 'Escape') { event.preventDefault(); openMenu('library'); }
+  if (event.key === '/' || event.key === 'Escape') { event.preventDefault(); openMenu(event.key === '/' ? 'library' : 'settings'); }
   if (event.key === 'Home' && visibleGames.length) { event.preventDefault(); selectGame(visibleGames[0].id, { focus: true }); }
   if (event.key === 'End' && visibleGames.length) { event.preventDefault(); selectGame(visibleGames.at(-1).id, { focus: true }); }
 });
@@ -273,7 +285,7 @@ function updatePadPolling() {
     const pad = [...navigator.getGamepads()].find(Boolean); if (!pad) return;
     const down = new Set(); pad.buttons.forEach((b, i) => { if (b.pressed) down.add(i); });
     if (isMenuOpen()) {
-      const items = [...menu.querySelectorAll('button:not(:disabled), input, a[href]')].filter(el => !el.hidden && el.getClientRects().length);
+      const items = [...menu.querySelectorAll('button:not(:disabled), input, a[href], summary')].filter(el => !el.hidden && el.getClientRects().length);
       const direction = down.has(12) || down.has(14) || pad.axes[1] < -.55 || pad.axes[0] < -.55 ? -1 : down.has(13) || down.has(15) || pad.axes[1] > .55 || pad.axes[0] > .55 ? 1 : 0;
       if (direction && items.length && performance.now() > padRepeat) { const current = items.indexOf(document.activeElement); items[(current + direction + items.length) % items.length].focus({ preventScroll: false }); padRepeat = performance.now() + 230; }
       if (down.has(0) && !padPrevious.has(0) && menu.contains(document.activeElement) && (document.activeElement.tagName !== 'INPUT' || ['checkbox', 'radio', 'button'].includes(document.activeElement.type))) document.activeElement.click();
@@ -284,7 +296,7 @@ function updatePadPolling() {
     if (horizontal && performance.now() > padRepeat) { moveSelection(horizontal); padRepeat = performance.now() + 250; }
     if (down.has(0) && !padPrevious.has(0)) launch();
     if (down.has(2) && !padPrevious.has(2)) toggleFavorite();
-    if (down.has(9) && !padPrevious.has(9)) openMenu('library');
+    if (down.has(9) && !padPrevious.has(9)) openMenu('settings');
     padPrevious = down;
   }, 100);
 }

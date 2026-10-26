@@ -5,8 +5,9 @@ Press Start on the cabinet or press Enter. A camera move squares up to the CRT, 
 ## Browse and play
 
 - Click the arrows, scroll the cover rail, swipe, or use Left/Right to choose a game. Enter or Play Game launches it inside the CRT. Favorites keep their existing browser storage key.
-- The menu holds search, game information, keyboard layouts for each player, controller guidance, save instructions, graphics help, feedback and licenses. GT2 has separate Arcade and Simulation disc options.
-- **Settings → CRT effect** switches the scanlines, phosphor texture, glass reflection and edge shading on or off. The rounded molded bezel remains visible in either mode, including fullscreen. The choice defaults on and is saved separately from favorites and game saves; blocked browser storage keeps the change for the current visit. It also controls the starting cabinet's painted CRT texture. The effect is static, with no flicker animation or extra render loop.
+- The launcher keeps its main screen to covers, the selected title and Play. Search lives in Collection; optional game details retain GT2's separate Arcade and Simulation disc choices. Longer explanations are linked to GitHub.
+- **Settings → Controls** holds the selected game's keyboard layouts for each player and controller guidance. **Saves & Help** keeps a short save reminder and links to instructions, feedback and licenses.
+- **Settings → Display → CRT effect** switches the scanlines, phosphor texture, glass reflection and edge shading on or off. The rounded charcoal bezel remains visible in either mode, including fullscreen. The choice defaults on and is saved separately from favorites and game saves; blocked browser storage keeps the change for the current visit. It also controls the starting cabinet's painted CRT texture. The effect is static, with no flicker animation, image tint or extra render loop.
 - A connected gamepad uses its D-pad or left stick to browse, A to select/play, X for favorites and Start for the menu. In the menu, directions move focus, A activates and B returns. Actual game input stays with the emulator and its saved mappings.
 - Back to Games unloads the iframe. Restart replaces it. The power button leaves the screen and pulls the camera back to the full cabinet. Existing game.html?id= links select the correct game in the cabinet and still require an explicit Start/play gesture.
 
@@ -19,5 +20,12 @@ initArcadeCabinet exposes enter, exit, setScreenMode and dispose. Its onCamera c
 Rendering is event-driven and settles to idle; the cabinet does not continuously animate beside an active emulator. Reduced motion skips camera travel. WebGL failure leaves the static cabinet and a working Start path into the same game browser. Menus contain focus, restore it on close, and make the covered browser/player inert. Browser keyboard shortcuts are inactive during gameplay.
 
 createArcadeSession owns a single iframe and accepts status only from that current, same-origin frame. Stop, replacement, restart, page exit and disposal remove the old frame. Save IDs, game files, BIOS and emulator bindings are unchanged. Build-time version queries keep the first-party module graph consistent after deployment; Three.js and R2 game assets retain their original URLs.
+
+Gameplay expands the CRT into a centered monitor and uses the whole inner glass
+for the player. A translucent icon dock floats above the image without reserving
+toolbar space. It remains available on touch and keyboard focus. Loading and
+error messages are visible only when needed; the running status panel disappears
+after startup. Portrait touch devices keep extra height for the emulator's touch
+controls, and portrait Settings expands for a usable scrolling panel.
 
 See VERIFICATION.md for actual checks and hardware limits.

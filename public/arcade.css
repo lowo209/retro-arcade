@@ -1,11 +1,11 @@
 /* The cabinet is the interface. All new rules stay inside the arcade shell. */
 .arcade-site {
-  --phosphor:#d5ff76;
-  --paper:#e9ecd9;
+  --phosphor:#ffc765;
+  --paper:#eee5d4;
   --amber:#ff9257;
-  --ink:#0a1010;
-  --muted:#8f9c88;
-  --line:#b6ce9d26;
+  --ink:#16120b;
+  --muted:#a59a87;
+  --line:#d5bd9426;
   --mono:'Cascadia Code','Consolas','Courier New',monospace;
   height:100dvh;
   overflow:hidden;
@@ -65,13 +65,13 @@
 .arcade-site[data-view='browser'] .room-bottom,.arcade-site[data-view='playing'] .room-bottom { opacity:.55; }
 
 /* The DOM screen matches the physical monitor after the camera settles. */
-.crt-overlay { position:absolute;z-index:12;left:var(--screen-left,8%);top:var(--screen-top,8%);width:var(--screen-width,84%);height:var(--screen-height,84%);display:flex;flex-direction:column;min-width:0;min-height:0;padding:13px 19px 8px;border:10px solid #18211c;border-radius:24px;overflow:hidden;container-type:size;background:#0b1511;color:var(--paper);box-shadow:0 0 0 1px #56604e,0 0 0 4px #050907,0 0 0 7px #303931bb,0 10px 35px #000b,inset 0 3px 5px #c7d6b015,inset 0 -5px 9px #0009;isolation:isolate; }
-.crt-overlay::before { content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 45% 25%,#5a7c3e1c,transparent 62%),linear-gradient(#0f1b15,#09120f);pointer-events:none; }
-.crt-overlay::after { content:'';position:absolute;inset:0;z-index:65;pointer-events:none;border-radius:12px;box-shadow:inset 0 0 0 1px #dff0c52b,inset 0 2px 5px #e2efc816,inset 0 -4px 8px #0008; }
+.crt-overlay { position:absolute;z-index:12;left:var(--screen-left,8%);top:var(--screen-top,8%);width:var(--screen-width,84%);height:var(--screen-height,84%);display:flex;flex-direction:column;min-width:0;min-height:0;padding:13px 19px 8px;border:17px solid #272620;border-radius:38px;overflow:hidden;container-type:size;background:#0e0e0b;color:var(--paper);box-shadow:0 0 0 1px #7b705c,0 0 0 7px #49443a,0 0 0 9px #22221f,0 18px 55px #000c,inset 0 4px 8px #000c;isolation:isolate; }
+.crt-overlay::before { content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 48% 38%,#b47f2420,transparent 72%),#10100d;pointer-events:none; }
+.crt-overlay::after { content:'';position:absolute;inset:0;z-index:65;pointer-events:none;border-radius:20px;box-shadow:inset 0 0 0 3px #020302,inset 0 3px 8px #000e,inset 0 -2px 5px #d1c5a52b; }
 /* Static layers give the CRT texture without flicker or a continuous render loop. */
-.crt-glass { position:absolute;inset:0;z-index:60;pointer-events:none;border-radius:12px;background:repeating-linear-gradient(0deg,transparent 0 2px,#00000030 2px 3px,transparent 3px 4px),radial-gradient(ellipse at 50% 46%,transparent 46%,#00000055 100%);box-shadow:inset 0 0 48px #0008,inset 0 0 6px #c9f6a526; }
-.crt-glass::before { content:'';position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(90deg,#f35b6b09 0 1px,#a3f08707 1px 2px,#67a4f20b 2px 3px); }
-.crt-glass::after { content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(116deg,#f3ffe70e 0%,#f3ffe703 22%,transparent 35%,transparent 75%,#f3ffe704 100%);box-shadow:inset 0 12px 28px -24px #e3f8c6aa; }
+.crt-glass { position:absolute;inset:0;z-index:60;pointer-events:none;border-radius:20px;background:repeating-linear-gradient(0deg,transparent 0 2px,#00000025 2px 3px),radial-gradient(ellipse at 50% 45%,transparent 42%,#00000070 100%);box-shadow:inset 0 0 55px #0008,inset 0 0 9px #fff0c31a; }
+.crt-glass::before { content:'';position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(90deg,#ff694d09 0 1px,#a3ed8707 1px 2px,#679cf20b 2px 3px); }
+.crt-glass::after { content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(114deg,#fff2ce11 0%,#fff9e607 18%,transparent 42%,transparent 76%,#fff2d505 100%);box-shadow:inset 0 14px 30px -24px #f7eaca8a; }
 .arcade-site[data-crt='off'] .crt-glass { display:none; }
 .screen-system-bar { flex:none;display:flex;align-items:center;gap:14px;min-height:36px;padding:0 1px 9px;border-bottom:1px solid var(--line);font:clamp(8px,.9cqw,12px) var(--mono); }
 .screen-wordmark { display:flex;align-items:baseline;gap:3px;font-size:clamp(13px,1.6cqw,21px);font-weight:900;white-space:nowrap; }
@@ -153,12 +153,12 @@
 .screen-footer>button>span { margin-left:5px; }
 
 /* Everything instructional lives behind the cabinet menu. */
-.arcade-menu { position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;min-height:0;padding:clamp(17px,3cqw,40px);background:linear-gradient(125deg,#142016fa,#08120dfc 65%);color:var(--paper); }
+.arcade-menu { position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;min-height:0;padding:clamp(17px,3cqw,40px);background:linear-gradient(125deg,#211e17fc,#0e0f0cfc 65%);color:var(--paper); }
 .menu-header { flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:clamp(14px,2cqw,28px);border-bottom:1px solid var(--line); }
 .menu-header h2 { margin:7px 0 0;font-size:clamp(23px,3.6cqw,48px);line-height:.95;letter-spacing:-.035em; }
 .menu-layout { display:flex;flex:1;min-height:0;min-width:0;padding:clamp(12px,2.3cqw,31px) 0; }
 .menu-tabs { display:flex;flex:none;flex-direction:column;gap:7px;width:clamp(135px,20cqw,255px);padding-right:clamp(12px,2cqw,27px);border-right:1px solid var(--line); }
-.menu-tabs>button { display:flex;align-items:center;gap:10px;padding:13px 10px;border:1px solid transparent;background:transparent;color:#899d7b;font:clamp(8px,.95cqw,13px) var(--mono);text-align:left;white-space:nowrap; }
+.menu-tabs>button,.menu-tabs>a { display:flex;align-items:center;gap:10px;padding:13px 10px;border:1px solid transparent;background:transparent;color:#b1a38a;font:clamp(10px,.95cqw,13px) var(--mono);text-align:left;white-space:nowrap;text-decoration:none; }
 .menu-tabs>button>span { color:#4e6745;font-size:.8em; }
 .menu-tabs>button:hover { color:var(--paper);border-color:#81a85e33; }
 .menu-tabs>button.is-active,.menu-tabs>button[aria-pressed='true'] { border-color:#adcf7c45;background:#b8e17b0a;color:var(--phosphor);box-shadow:inset 2px 0 var(--phosphor); }
@@ -238,24 +238,33 @@
 .console-controls { display:grid;grid-template-columns:1fr 1fr;column-gap:22px;margin:12px 0 23px; }.console-controls>div { display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #a5c47b1b;color:#a6bc91;font:clamp(9px,.95cqw,13px) var(--mono); }.console-controls kbd { display:block;flex:none;min-width:29px;text-align:center;color:var(--phosphor); }
 .control-tabs button { padding:8px 12px;border:1px solid #a5c57744;background:transparent;color:#98ad81;font:clamp(9px,.95cqw,13px) var(--mono); }
 .control-tabs button[aria-pressed='true'],.control-tabs button.is-active { color:var(--phosphor);border-color:var(--phosphor); }
+.settings-tabs { display:flex;flex-wrap:wrap;gap:6px;margin-bottom:19px; }
+.settings-tabs>button { min-height:38px;padding:8px 12px;border:1px solid #a8957340;background:transparent;color:#afa38d;font:clamp(10px,1cqw,13px) var(--mono); }
+.settings-tabs>button[aria-pressed='true'] { color:var(--phosphor);border-color:var(--phosphor);background:#ffc7650b; }
+.settings-details { margin:18px 0;color:#b6a78f;font:clamp(10px,1.1cqw,14px)/1.6 var(--mono); }
+.settings-details summary { width:fit-content;padding:8px 0;cursor:pointer; }
+.settings-details p { margin-top:9px; }
+.settings-session-actions { display:flex;flex-wrap:wrap;gap:9px 19px;margin-top:22px;padding-top:10px;border-top:1px solid var(--line); }
+.settings-session-actions .menu-text-button { min-height:36px;margin:0;color:var(--phosphor);font-size:11px; }
 .screen-toast { position:absolute;z-index:80;left:50%;bottom:17px;max-width:85%;margin:0;padding:10px 14px;transform:translateX(-50%);border:1px solid #eaffbc;background:var(--phosphor);color:#15220e;font:clamp(9px,1cqw,13px)/1.35 var(--mono);text-align:center;box-shadow:0 5px 25px #0009; }
 
 /* A running game remains inside the same glass and relinquishes browser input. */
 #session-container.arcade-session { display:flex;flex:1;flex-direction:column;min-width:0;min-height:0;overflow:hidden; }
-.arcade-session-toolbar { display:flex;flex:none;align-items:center;gap:9px;min-height:38px;padding:5px 0;border-bottom:1px solid var(--line); }
-.arcade-session-toolbar button { display:grid;place-content:center;flex:none;width:30px;height:29px;padding:0;border:1px solid #a1c37442;background:#101e10;color:#b8d59a;font:17px var(--mono); }
+.arcade-session-toolbar { position:absolute;z-index:25;top:12px;right:12px;display:flex;align-items:center;gap:5px;min-height:0;padding:4px;border:1px solid #cbb59030;border-radius:12px;background:#0e0e0cce;opacity:.5;transition:opacity .2s; }
+.arcade-session-toolbar:hover,.arcade-session-toolbar:focus-within { opacity:1; }
+.arcade-session-toolbar button { display:grid;place-content:center;flex:none;width:34px;height:34px;padding:0;border:0;border-radius:7px;background:transparent;color:#e2cfab;font:20px var(--mono); }
 .arcade-session-toolbar button:hover { color:var(--phosphor);border-color:var(--phosphor); }
-.arcade-session-title { min-width:0;overflow:hidden;color:#a9bc93;font:clamp(8px,1cqw,13px) var(--mono);text-overflow:ellipsis;white-space:nowrap; }
+.arcade-session-title { display:none; }
 .arcade-session-actions { display:flex;gap:5px;margin-left:auto; }
 .arcade-session-stage { position:relative;flex:1;min-height:0;min-width:0;overflow:hidden;background:#000; }
 .arcade-session-frame { display:block;width:100%;height:100%;border:0; }
-.arcade-session-footer { flex:none;min-height:24px;padding:7px 0 2px;color:#789469;font:clamp(7px,.8cqw,11px)/1.3 var(--mono); }
-.arcade-session-note { flex:none;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 10px;padding:5px 0;color:#9daf8d;font:clamp(8px,.85cqw,11px)/1.4 var(--mono); }
+.arcade-session-footer { position:absolute;z-index:21;bottom:24px;left:50%;width:max-content;max-width:80%;min-height:0;transform:translateX(-50%);padding:9px 13px;border:1px solid #cbb59030;border-radius:6px;background:#090909dd;color:#d7c8ac;text-align:center;font:clamp(10px,1.1cqw,14px)/1.4 var(--mono); }
+.arcade-session-note { position:absolute;z-index:22;bottom:60px;left:20px;right:20px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 10px;padding:8px 12px;background:#090909e8;color:#c6bba4;font:clamp(10px,1cqw,13px)/1.4 var(--mono); }
 .arcade-session-note a { color:var(--phosphor);text-decoration:underline;text-underline-offset:3px; }
 .arcade-session-error { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;width:100%;height:100%;padding:25px;text-align:center;background:radial-gradient(#24301b,#0a140c); }
 .arcade-session-error>strong { color:var(--amber);font-size:clamp(20px,3cqw,42px);font-weight:800;text-transform:uppercase; }
 .arcade-session-error>p { max-width:75%;margin:0;color:#b0bd9f;font:clamp(10px,1.2cqw,16px)/1.6 var(--mono); }
-.crt-overlay:fullscreen { left:0!important;top:0!important;width:100vw!important;height:100dvh!important;border-width:6px;border-radius:18px;padding:8px 14px;box-shadow:inset 0 0 0 1px #dff0c52b; }
+.crt-overlay:fullscreen { left:0!important;top:0!important;width:100vw!important;height:100dvh!important;border-width:13px;border-radius:28px;padding:8px 14px;box-shadow:inset 0 0 0 1px #e6d3ae2b; }
 .no-script { position:absolute;z-index:90;left:50%;top:50%;width:min(90%,430px);padding:25px;transform:translate(-50%,-50%);border:1px solid var(--phosphor);background:#111c13; }
 .no-script h1 { color:var(--phosphor);font-size:27px;line-height:1.1; }.no-script p { color:#a9b69a;font:12px/1.6 var(--mono); }
 
@@ -264,7 +273,7 @@
   .arcade-site .room-bottom { left:25px;right:25px;bottom:20px; }
   .room-brand { font-size:10px;gap:9px; }.room-monogram { width:32px;height:36px;font-size:25px; }
   .attract-caption { left:4%;font-size:7px;gap:6px; }
-  .crt-overlay { padding:10px 15px 7px;border-width:9px;border-radius:18px; }
+  .crt-overlay { padding:10px 15px 7px;border-width:14px;border-radius:30px; }
   .game-carousel { margin-inline:-15px; }
   .screen-system-bar { min-height:31px;padding-bottom:6px; }
   .browser-heading { padding-top:12px;padding-bottom:9px; }
@@ -282,7 +291,7 @@
   .attract-start { bottom:8%;gap:10px; }.machine-start { min-width:230px;min-height:63px;padding:13px 20px;gap:15px; }
   .machine-start>span:nth-child(2) { font-size:18px; }.machine-start small { font-size:7px; }.machine-start kbd { margin-left:5px; }
   .start-coordinate { font-size:8px; }.attract-hint { font-size:6px; }
-  .crt-overlay { left:13px!important;top:80px!important;width:calc(100vw - 26px)!important;height:calc(100dvh - 143px)!important;padding:11px 12px 7px;border:8px solid #1f2a20;border-radius:19px;box-shadow:0 0 0 1px #536246,0 0 0 4px #050b06,0 12px 40px #000c,inset 0 0 40px #0005; }
+  .crt-overlay { left:13px!important;top:80px!important;width:calc(100vw - 26px)!important;height:calc(100dvh - 143px)!important;padding:11px 12px 7px;border:12px solid #272620;border-radius:29px;box-shadow:0 0 0 1px #7b705c,0 0 0 5px #49443a,0 12px 40px #000c,inset 0 0 40px #0005; }
   .arcade-site[data-view='browser'] .room-hud,.arcade-site[data-view='playing'] .room-hud { opacity:1; }
   .screen-system-bar { min-height:34px;gap:8px;padding-bottom:7px; }
   .screen-wordmark { font-size:17px; }.screen-wordmark>b { font-size:10px;letter-spacing:.05em; }
@@ -308,7 +317,7 @@
   .screen-footer>button { font-size:7px; }.screen-footer>button>span { margin-left:2px; }
   .arcade-menu { padding:17px 14px; }.menu-header { padding-bottom:15px; }.menu-header h2 { margin-top:6px;font-size:26px; }
   .menu-layout { flex-direction:column;padding:13px 0; }.menu-tabs { flex-direction:row;gap:4px;width:100%;padding:0 0 12px;margin-bottom:13px;border-right:0;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none; }
-  .menu-tabs>button { gap:4px;flex:none;padding:8px 7px;font-size:7px; }.menu-tabs>button>span { display:none; }
+  .menu-tabs>button,.menu-tabs>a { gap:4px;flex:none;padding:10px 9px;font-size:10px; }.menu-tabs>button>span { display:none; }
   .menu-tabs>button.is-active,.menu-tabs>button[aria-pressed='true'] { box-shadow:inset 0 -2px var(--phosphor); }
   .menu-content { padding:0 2px; }.menu-content h3 { margin-bottom:12px;font-size:22px; }.menu-content h4 { margin-top:20px;font-size:10px; }
   .menu-content p,.menu-content ul,.menu-content ol { font-size:10px;line-height:1.65; }.menu-content table { font-size:9px; }.menu-content th,.menu-content td { padding:8px 5px; }
@@ -348,6 +357,36 @@
   .favorite-key,.info-key { width:27px;height:29px;font-size:17px; }.launch-key { min-width:100px;height:29px;padding-inline:11px;font-size:9px;gap:16px; }
   .screen-footer { min-height:19px;font-size:6px;padding-top:4px; }.screen-footer kbd { padding:1px 3px; }
   .arcade-menu { padding:13px 19px; }.menu-header { padding-bottom:9px; }.menu-header h2 { margin-top:3px;font-size:24px; }.menu-layout { padding:10px 0; }.menu-tabs>button { padding:8px;font-size:8px; }.menu-content { padding-left:18px; }.menu-content p { font-size:10px; }.menu-footer { padding-top:6px;font-size:7px; }
+}
+/* A game fills the monitor. The floating dock never consumes picture space. */
+.arcade-site[data-view='playing'] .crt-overlay {
+  left:50%!important;top:50%!important;
+  width:min(calc(100vw - 56px),calc((100dvh - 56px) * 1.4))!important;
+  height:min(calc(100dvh - 56px),calc((100vw - 56px) / 1.4))!important;
+  transform:translate(-50%,-50%);padding:0;
+  border:clamp(12px,1.6vw,22px) solid #272620;border-radius:clamp(28px,3vw,44px);
+}
+.arcade-site[data-view='playing'] .screen-system-bar { display:none; }
+.arcade-site[data-view='playing'] .machine-stage { opacity:0;pointer-events:none; }
+.arcade-site[data-view='playing'] .room-hud { visibility:hidden; }
+#session-container.arcade-session { position:relative;background:#000; }
+.arcade-site[data-view='playing'] .crt-overlay:fullscreen { left:0!important;top:0!important;width:100vw!important;height:100dvh!important;transform:none;border-width:12px; }
+@media(any-pointer:coarse) { .arcade-session-toolbar { opacity:.85; } }
+@media(max-width:700px) and (orientation:portrait) {
+  .arcade-site[data-view='playing'] .crt-overlay { border-width:10px;border-radius:28px; }
+  .arcade-site[data-view='playing'] .crt-overlay:has(.arcade-menu:not([hidden])) { width:calc(100vw - 24px)!important;height:calc(100dvh - 32px)!important; }
+  .arcade-session-toolbar { top:10px;right:10px;gap:3px;min-height:0; }
+  .arcade-session-toolbar button { width:40px;height:40px;font-size:20px; }
+  .arcade-session-footer { font-size:10px;min-height:0;padding:8px 10px; }
+  .arcade-session-note { font-size:10px; }
+  .settings-tabs { gap:5px; }.settings-tabs>button { min-height:36px;padding:8px;font-size:10px; }
+}
+@media(max-width:700px) and (orientation:portrait) and (any-pointer:coarse) {
+  .arcade-site[data-view='playing'] .crt-overlay { width:calc(100vw - 24px)!important;height:calc(100dvh - 32px)!important; }
+}
+@media(max-height:560px) and (orientation:landscape) {
+  .arcade-site[data-view='playing'] .crt-overlay { width:calc(100vw - 24px)!important;height:calc(100dvh - 24px)!important;border-width:10px;border-radius:26px; }
+  .arcade-session-toolbar { top:8px;right:8px; }
 }
 @media(prefers-reduced-motion:reduce) {
   .arcade-site *,.arcade-site *::before,.arcade-site *::after { animation:none!important;transition:none!important;scroll-behavior:auto!important; }

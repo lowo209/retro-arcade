@@ -13,13 +13,15 @@ export function createArcadeSession(container, {
 } = {}) {
   if (!container?.replaceChildren) throw new TypeError('A session container is required.');
   let current = null, frame = null, timer = null, disposed = false;
-  let statusElement = null, noteElement = null, fullscreenButton = null;
+  let statusElement = null, statusPanel = null, noteElement = null, fullscreenButton = null;
   let restartButton = null, stage = null;
 
   const detail = (phase, message) => ({ phase, message, game: current?.game || null, variant: current?.variant || 'primary' });
   function report(phase, message) {
     const text = String(message || '').slice(0, 4096);
     if (statusElement) statusElement.textContent = text;
+    // Loading and failures stay visible; a running game owns the whole display.
+    if (statusPanel) statusPanel.hidden = phase === 'started';
     container.dataset.phase = phase;
     onStatus(detail(phase, text));
   }
@@ -88,17 +90,17 @@ export function createArcadeSession(container, {
     stage = document.createElement('div');
     stage.className = 'arcade-session-stage';
     Object.assign(stage.style, { position: 'relative', minHeight: '0', minWidth: '0', flex: '1', overflow: 'hidden' });
-    const footer = document.createElement('div');
-    footer.className = 'arcade-session-footer';
+    statusPanel = document.createElement('div');
+    statusPanel.className = 'arcade-session-footer';
     statusElement = document.createElement('span');
     statusElement.className = 'arcade-session-status';
     statusElement.setAttribute('role', 'status');
     statusElement.setAttribute('aria-live', 'polite');
-    footer.append(statusElement);
+    statusPanel.append(statusElement);
     noteElement = document.createElement('div');
     noteElement.className = 'arcade-session-note';
     noteElement.hidden = true;
-    container.replaceChildren(toolbar, stage, footer, noteElement);
+    container.replaceChildren(toolbar, stage, statusPanel, noteElement);
     refreshFullscreen();
   }
   function showError(message, { preview = false } = {}) {
@@ -196,9 +198,7 @@ export function createArcadeSession(container, {
       // Preserve the emulator's specific error in its iframe as well as the
       // compact status. The visitor can read it and report it before retrying.
       note('', { help: graphicsError(message), feedback: true });
-    } else if (phase === 'started') {
-      note(current?.variant === 'simulation' ? 'Simulation disc · separate saves' : '');
-    }
+    } else if (phase === 'started') note('');
     report(phase, message);
   }
   function stop({ notify = false } = {}) {
@@ -206,7 +206,7 @@ export function createArcadeSession(container, {
     clearTimeout(timer); timer = null;
     frame?.remove(); frame = null;
     current = null;
-    stage = statusElement = noteElement = fullscreenButton = restartButton = null;
+    stage = statusElement = statusPanel = noteElement = fullscreenButton = restartButton = null;
     container.replaceChildren();
     delete container.dataset.phase;
     if (notify && previous) onExit(previous);
