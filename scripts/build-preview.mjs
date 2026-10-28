@@ -7,7 +7,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Only these website assets can enter a public preview. Never walk private/,
 // vendor/, local configuration, generated game code or source-export folders.
 export const PREVIEW_FILES = [
-  'index.html', 'game.html', 'app.js', 'game.js', 'catalog.js', 'deployment.js', 'display-settings.js',
+  'index.html', 'game.html', 'app.js', 'game.js', 'catalog.js', 'deployment.js', 'display-settings.js', 'launcher-history.js',
   'styles.css', 'arcade.css', 'arcade-cabinet.js', 'arcade-session.js', 'lib/three/three.module.min.js',
   'lib/three/three.core.min.js', 'lib/three/LICENSE',
   ...['umk3', 'nfs', 'gt2', 'gt4', 're3', 'cover-fallback', 'arcade-fallback', 'favicon'].map(name => `assets/${name}.svg`),

@@ -11,7 +11,7 @@
     "build:pages": "node scripts/build-hosted.mjs",
     "preview": "node scripts/preview-server.mjs",
     "setup": "python scripts/setup.py",
-    "test": "node --test tests/server.test.mjs tests/controls.test.mjs tests/cabinet.test.mjs tests/startup.test.mjs tests/preview.test.mjs tests/hosted.test.mjs tests/arcade-session.test.mjs tests/display-settings.test.mjs",
+    "test": "node --test tests/server.test.mjs tests/controls.test.mjs tests/cabinet.test.mjs tests/startup.test.mjs tests/preview.test.mjs tests/hosted.test.mjs tests/arcade-session.test.mjs tests/display-settings.test.mjs tests/launcher-history.test.mjs",
     "check": "node scripts/check.mjs",
     "export-source": "node scripts/export-source.mjs"
   },

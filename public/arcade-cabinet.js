@@ -191,10 +191,8 @@ export function initArcadeCabinet(host, options = {}) {
       ctx.strokeStyle = '#c6743d'; ctx.lineWidth = 4; ctx.strokeRect(16,16,992,224);
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.shadowColor='#ff792d'; ctx.shadowBlur=16;
-      ctx.font = '900 95px "Arial Black", Arial, sans-serif'; ctx.fillStyle = '#ffc078'; ctx.fillText('RETRO', 316,115);
-      ctx.shadowBlur=8; ctx.font = '900 95px "Arial Black", Arial, sans-serif'; ctx.fillStyle = '#f9e6c6'; ctx.fillText('ARCADE', 704,115);
-      ctx.shadowBlur=0; ctx.font = '18px monospace'; ctx.fillStyle = '#c1a082'; ctx.fillText('ONE CABINET. EVERY CLASSIC.', 512,205);
-      ctx.fillStyle='#e08b4f'; ctx.fillRect(58,190,80,3); ctx.fillRect(886,190,80,3);
+      ctx.font = '900 95px "Arial Black", Arial, sans-serif'; ctx.fillStyle = '#ffc078'; ctx.fillText('RETRO', 316,133);
+      ctx.shadowBlur=8; ctx.font = '900 95px "Arial Black", Arial, sans-serif'; ctx.fillStyle = '#f9e6c6'; ctx.fillText('ARCADE', 704,133);
     });
     decal(marquee,1.45,.29,0,1.53,.625);
     // Screen sits inside a solid tilted bezel; its subtly convex glass has real depth.
@@ -250,7 +248,6 @@ export function initArcadeCabinet(host, options = {}) {
     box(.43,.61,.018,0,-.81,.615,panel);
     box(.25,.10,.028,0,-.63,.633,orange);
     box(.025,.065,.006,0,-.63,.650,black);
-    decal(label('25¢  /  1 PLAY',1,1,'#c5b9a6',32),.28,.07,0,-.50,.633);
     box(.26,.14,.025,0,-.96,.635,black);
     box(.27,.022,.07,0,-1.03,.66,trim);
     const lock=cylinder(.025,.008,0,0,0,metal);lock.rotation.x=Math.PI/2;lock.position.set(.13,-.80,.633);
@@ -260,11 +257,8 @@ export function initArcadeCabinet(host, options = {}) {
     const sideArt = texture(512,1024,ctx=>{
       ctx.clearRect(0,0,512,1024); ctx.lineWidth=8; ctx.strokeStyle='#d47a3b';
       for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(36+i*37,920);ctx.lineTo(465,440+i*37);ctx.stroke();}
-      ctx.fillStyle='#f1b579';ctx.font='900 105px "Arial Black", Arial, sans-serif';ctx.save();ctx.translate(275,390);ctx.rotate(-Math.PI/2);ctx.fillText('R / 01',0,0);ctx.restore();
-      ctx.fillStyle='#9c7b60';ctx.font='18px monospace';ctx.fillText('RETRO ARCADE',110,966);
     });
     const sideMark = decal(sideArt, .90,2.55,.883,-.15,.02); sideMark.rotation.y=Math.PI/2;
-    decal(label('SYSTEM 01  /  EST. 1995',1,1,'#8b9290',22),.64,.055,0,-1.42,.613);
     for(const x of [-.63,.63]) for(const y of [-1.45,-.35]) { const fastener=cylinder(.013,.008,0,0,0,metal); fastener.rotation.x=Math.PI/2;fastener.position.set(x,y,.615); }
     // Cabinet rests on a floor; it never floats or rotates about an arbitrary corner.
     const floorMap=texture(512,512,ctx=>{
@@ -301,18 +295,15 @@ export function initArcadeCabinet(host, options = {}) {
       if(bootAt!==null&&!motion.matches&&elapsed<260){
         ctx.fillStyle='#d7f1d2';ctx.fillRect(75,249,650,Math.max(2,elapsed/18));
       }else if(bootAt!==null&&!motion.matches){
-        ctx.textAlign='left';ctx.font='24px monospace';ctx.fillStyle='#b9d6b8';
-        ['RETRO ARCADE / SYSTEM 01','DISPLAY ............. OK','CONTROLS ............ OK','ENTERING THE ARCADE ...'].slice(0,Math.min(4,1+Math.floor((elapsed-260)/270))).forEach((line,i)=>ctx.fillText(line,54,130+i*57));
+        ctx.font='bold 38px monospace';ctx.fillStyle='#f2bb78';ctx.fillText('START',400,250);
         ctx.fillStyle='#344138';ctx.fillRect(54,410,692,6);ctx.fillStyle='#efa467';ctx.fillRect(54,410,692*Math.min(1,elapsed/1550),6);
       }else{
         ctx.strokeStyle='#6c9b7428';ctx.lineWidth=1;
         for(let x=-300;x<1100;x+=80){ctx.beginPath();ctx.moveTo(400,235);ctx.lineTo(x,500);ctx.stroke();}
         for(let y=300;y<500;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(800,y);ctx.stroke();}
-        ctx.fillStyle='#82a28b';ctx.font='19px monospace';ctx.fillText('SYSTEM 01  /  ALL CLASSICS',400,60);
         ctx.shadowColor='#d79150';ctx.shadowBlur=crtEnabled?18:0;
         ctx.fillStyle='#f2bb78';ctx.font='900 108px monospace';ctx.fillText('RETRO',400,177);ctx.fillText('ARCADE',400,285);ctx.shadowBlur=0;
-        ctx.fillStyle='#b9d0ab';ctx.font='bold 27px monospace';ctx.fillText(now<messageUntil?message:screenMode==='playing'?'GAME IN PROGRESS':powered?'SELECT YOUR GAME':'[ PRESS START ]',400,393);
-        ctx.fillStyle='#78957a';ctx.font='16px monospace';ctx.fillText('NO QUARTERS REQUIRED',400,452);
+        ctx.fillStyle='#b9d0ab';ctx.font='bold 27px monospace';ctx.fillText(now<messageUntil?message:screenMode==='playing'?'':powered?'':'START',400,393);
       }
       if(crtEnabled){
         const reflection=ctx.createLinearGradient(0,0,650,430);reflection.addColorStop(0,'#c9d6cf14');reflection.addColorStop(.45,'#c9d6cf04');reflection.addColorStop(1,'#0000');ctx.fillStyle=reflection;ctx.fillRect(0,0,800,500);

@@ -9,6 +9,13 @@ Search and both GT2 discs remain available from the collection and game details.
 The power button pulls back to the full machine. Previously shared game links
 still select the right game. Further instructions live here on GitHub.
 
+The opening screen keeps only the cabinet and **Start**. The launcher remembers
+your selection and offers a **Recent** filter for games that actually started.
+Valid shared game links override the remembered selection. Recent history stays
+in this browser; clear it in Settings without affecting game saves or favorites.
+You can enter the cabinet with gamepad A or Start, then release before selecting
+and launching a game.
+
 **Playable tester release:** seven games are available from the public link: UMK3, Need for Speed: High Stakes, Gran Turismo 2, Resident Evil 3, Ace Combat 3, Ghost in the Shell and G-Police: Weapons of Justice. GT2 includes separate Arcade and Simulation launches. Games download from Cloudflare R2 and run in the browser; the cabinet, search, filters, favorites and control guides are included.
 
 **Hosting:** [R2-HOSTING.md](docs/R2-HOSTING.md) documents the 4.81 GB release, upload tool, free-usage assumptions and activation checks. Only games in the verified public manifest can launch. GT4 remains unavailable until its separate browser build is ready.

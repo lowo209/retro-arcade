@@ -2,6 +2,7 @@ import { GAMES, controlsForGame, escapeHTML as esc, loadLibrary, IS_PREVIEW, IS_
 import { initArcadeCabinet } from './arcade-cabinet.js';
 import { createArcadeSession } from './arcade-session.js';
 import { loadDisplaySettings, saveDisplaySettings } from './display-settings.js';
+import { loadLauncherHistory, saveLauncherHistory, preferredGameId, rememberSelection, rememberStartedGame } from './launcher-history.js';
 
 const $ = selector => document.querySelector(selector);
 const screen = $('#cabinet-screen'), browser = $('#browser-panel'), rail = $('#game-rail');
@@ -9,8 +10,10 @@ const menu = $('#arcade-menu'), sessionHost = $('#session-container');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const favoriteKey = 'retro-arcade-favorites-v1';
 const githubUrl = 'https://github.com/lowo209/retro-arcade';
+const gameIds = GAMES.map(game => game.id);
 const requestedGame = new URLSearchParams(location.search).get('game');
-let selectedId = GAMES.some(g => g.id === requestedGame) ? requestedGame : GAMES[0].id;
+let launcherHistory = loadLauncherHistory(gameIds);
+let selectedId = preferredGameId(requestedGame, launcherHistory, gameIds);
 let library = null, libraryError = '', filter = 'all', search = '', visibleGames = [...GAMES];
 let favorites = new Set(), view = 'attract', menuTab = 'library', controlPlayer = 1;
 let settingsTab = 'display';
@@ -61,9 +64,15 @@ function leaveArcade() {
 }
 const session = createArcadeSession(sessionHost, {
   fullscreenTarget: screen,
-  onExit() { setView('browser'); centerSelected(false); $('#launch-game').focus({ preventScroll: true }); $('#system-label').textContent = 'READY'; },
+  onExit() { setView('browser'); renderLibrary(); $(visibleGames.length ? '#launch-game' : '#clear-filters').focus({ preventScroll: true }); $('#system-label').textContent = 'READY'; },
   onMenu() { openMenu('controls'); },
-  onStatus({ phase }) { $('#system-label').textContent = phase === 'started' ? 'PLAYING' : phase === 'error' ? 'ERROR' : 'LOADING'; },
+  onStatus({ phase, game, variant }) {
+    $('#system-label').textContent = phase === 'started' ? 'PLAYING' : phase === 'error' ? 'ERROR' : 'LOADING';
+    if (phase === 'started' && game) {
+      launcherHistory = rememberStartedGame(launcherHistory, game.id, variant, gameIds);
+      saveLauncherHistory(launcherHistory, gameIds);
+    }
+  },
 });
 cabinet = initArcadeCabinet($('#arcade-cabinet'), {
   crtEnabled: displaySettings.crtEnabled,
@@ -89,6 +98,8 @@ function centerSelected(animate = true) {
 function selectGame(id, { center = true, animate = true, focus = false } = {}) {
   if (!visibleGames.some(g => g.id === id)) return;
   selectedId = id;
+  launcherHistory = rememberSelection(launcherHistory, id, gameIds);
+  saveLauncherHistory(launcherHistory, gameIds);
   for (const tile of rail.querySelectorAll('[data-game]')) {
     const active = tile.dataset.game === id; tile.classList.toggle('is-selected', active); tile.setAttribute('aria-pressed', String(active)); tile.tabIndex = active ? 0 : -1;
   }
@@ -120,15 +131,21 @@ function renderSelection() {
   if (isMenuOpen() && (menuTab === 'game' || menuTab === 'settings')) renderMenu();
 }
 function renderLibrary({ center = true } = {}) {
-  visibleGames = GAMES.filter(game => (filter === 'all' || filter === game.platform || filter === 'favorites' && favorites.has(game.id)) && `${game.title} ${game.genre} ${game.platform}`.toLowerCase().includes(search.toLowerCase()));
-  if (!visibleGames.some(g => g.id === selectedId) && visibleGames.length) selectedId = visibleGames[0].id;
+  const recentIds = launcherHistory.recent.map(item => item.id);
+  const collection = filter === 'recent' ? recentIds.map(id => GAMES.find(game => game.id === id)).filter(Boolean) : GAMES;
+  visibleGames = collection.filter(game => (filter === 'all' || filter === 'recent' || filter === game.platform || filter === 'favorites' && favorites.has(game.id)) && `${game.title} ${game.genre} ${game.platform}`.toLowerCase().includes(search.toLowerCase()));
+  if (!visibleGames.some(g => g.id === selectedId) && visibleGames.length) {
+    selectedId = visibleGames[0].id;
+    launcherHistory = rememberSelection(launcherHistory, selectedId, gameIds);
+    saveLauncherHistory(launcherHistory, gameIds);
+  }
   rail.innerHTML = visibleGames.map(game => {
     const state = stateFor(game.id), selected = game.id === selectedId;
     const status = IS_PREVIEW ? 'PREVIEW' : game.experimental ? 'SOON' : state?.ready ? '' : library ? 'UNAVAILABLE' : 'LOADING';
     return `<div class="game-slot" role="listitem"><button type="button" class="game-tile ${selected ? 'is-selected' : ''} ${state?.ready ? 'is-ready' : ''}" data-game="${game.id}" aria-pressed="${selected}" aria-label="Select ${esc(game.title)}${status ? ` — ${status.toLowerCase()}` : ''}" tabindex="${selected ? '0' : '-1'}"><span class="tile-cover"><img src="${esc(coverFor(game))}" alt="${esc(game.title)} cover" width="300" height="360"><span class="tile-platform">${icon(game.platform)}</span><span class="tile-favorite" ${favorites.has(game.id) ? '' : 'hidden'}>♥</span><span class="tile-shine"></span></span><span class="tile-caption"><span>${esc(game.short)}</span>${status ? `<small>${status}</small>` : ''}</span></button></div>`;
   }).join('');
   $('#empty-results').hidden = visibleGames.length > 0;
-  $('#empty-message').textContent = search ? `Nothing matches “${search}”.` : filter === 'favorites' ? 'Your favorite games will appear here.' : 'No games in this selection.';
+  $('#empty-message').textContent = search ? `Nothing matches “${search}”.` : filter === 'recent' ? 'Play a game to see it here.' : filter === 'favorites' ? 'Your favorite games will appear here.' : 'No games in this selection.';
   $('#previous-game').disabled = $('#next-game').disabled = visibleGames.length < 2;
   $('#favorites-count').textContent = favorites.size;
   for (const button of document.querySelectorAll('[data-filter]')) { const active = button.dataset.filter === filter; button.classList.toggle('is-active', active); button.setAttribute('aria-pressed', String(active)); }
@@ -137,9 +154,9 @@ function renderLibrary({ center = true } = {}) {
   renderSelection(); if (center) requestAnimationFrame(() => centerSelected(false));
 }
 async function refreshLibrary() {
-  libraryError = ''; $('#room-status').textContent = 'CONNECTING';
-  try { library = await loadLibrary(); $('#room-status').textContent = IS_PREVIEW ? 'PREVIEW' : 'ONLINE'; }
-  catch (error) { libraryError = error.message || 'The library is unavailable.'; $('#room-status').textContent = 'CONNECTION LOST'; toast('Library unavailable. Open the menu to retry.'); }
+  libraryError = '';
+  try { library = await loadLibrary(); }
+  catch (error) { libraryError = error.message || 'The library is unavailable.'; toast('Library unavailable. Open Collection to retry.'); }
   renderLibrary(); if (isMenuOpen()) renderMenu();
 }
 function toggleFavorite() {
@@ -168,12 +185,12 @@ function openMenu(tab = 'library') {
   if (view === 'attract' || view === 'entering') { menuAfterEnter = tab; if (view === 'attract') enterArcade(); return; }
   if (menu.hidden) menuFocus = document.activeElement;
   menuTab = tab; menu.hidden = false; $('#open-menu').setAttribute('aria-expanded', 'true');
-  browser.inert = true; sessionHost.inert = true; $('.screen-system-bar').inert = true; $('.room-hud').inert = true; renderMenu();
+  browser.inert = true; sessionHost.inert = true; $('.screen-system-bar').inert = true; renderMenu();
   (tab === 'library' ? $('#search') : menu.querySelector(`[data-menu-tab="${tab}"]`) || $('#close-menu'))?.focus({ preventScroll: true });
 }
 function closeMenu({ restore = true } = {}) {
   if (menu.hidden) return;
-  menu.hidden = true; $('#open-menu').setAttribute('aria-expanded', 'false'); browser.inert = false; sessionHost.inert = false; $('.screen-system-bar').inert = false; $('.room-hud').inert = false;
+  menu.hidden = true; $('#open-menu').setAttribute('aria-expanded', 'false'); browser.inert = false; sessionHost.inert = false; $('.screen-system-bar').inert = false;
   if (restore) { if (menuFocus?.isConnected && !menuFocus.closest('[hidden]')) menuFocus.focus({ preventScroll: true }); else if (inSession()) session.focus(); else $('#open-menu').focus({ preventScroll: true }); }
 }
 function renderMenu() {
@@ -196,6 +213,7 @@ function renderMenu() {
     if (settingsTab === 'display') panel = `<label class="display-setting" for="crt-effect"><span class="display-setting-copy"><strong>CRT effect</strong><small id="crt-effect-description">Scanlines & glass texture</small></span><span class="display-setting-toggle"><input type="checkbox" role="switch" id="crt-effect" aria-describedby="crt-effect-description" ${displaySettings.crtEnabled ? 'checked' : ''}><span aria-hidden="true"></span></span></label><p class="display-settings-status" id="display-settings-status" role="status" aria-live="polite">${esc(displaySettingsStatus)}</p>`;
     if (settingsTab === 'controls') panel = `<p class="menu-eyebrow">${esc(game.short)}</p><div class="control-player-switch"><button type="button" data-control-player="1" aria-pressed="${controlPlayer === 1}" class="${controlPlayer === 1 ? 'is-active' : ''}">PLAYER 1</button>${!game.singlePlayer ? `<button type="button" data-control-player="2" aria-pressed="${controlPlayer === 2}" class="${controlPlayer === 2 ? 'is-active' : ''}">PLAYER 2</button>` : ''}</div><div class="console-controls">${controlsForGame(game.id).map(control => `<div><span>${esc(controlLabel(control, game.id))}</span><kbd>${esc(keyLabel(control[`p${game.singlePlayer ? 1 : controlPlayer}`]))}</kbd></div>`).join('')}</div>${game.id === 're3' ? '<p class="menu-fine">Tank controls: forward follows Jill’s direction.</p>' : ''}<p class="menu-fine">Click the game to use your keyboard. For a gamepad, connect it and assign it in the emulator’s Controls menu. Saved mappings take priority.</p><details class="settings-details"><summary>Launcher shortcuts</summary><p>← → browse · Enter plays · F favorites · / searches · Esc opens Settings.<br>Gamepad: D-pad / stick browse · A plays · X favorites · Start opens Settings.</p></details>`;
     if (settingsTab === 'saves') panel = `<p>Save, load and export from the game’s toolbar. Saves stay in this browser; export a backup before clearing browser data.</p>${game.id === 'umk3' ? '<p class="menu-warning">UMK3 save states are unavailable.</p>' : ''}<a class="menu-link" href="${githubUrl}#readme" target="_blank" rel="noopener noreferrer">HOW IT WORKS ↗</a><a class="menu-link" href="${siteUrl('guides/browser.html')}" target="_blank" rel="noopener noreferrer">PICTURE & SOUND HELP ↗</a>${FEEDBACK_URL ? `<a class="menu-link" href="${esc(FEEDBACK_URL)}" target="_blank" rel="noopener noreferrer">REPORT A PROBLEM ↗</a>` : ''}<a class="menu-link" href="${siteUrl('software.html')}" target="_blank" rel="noopener noreferrer">LICENSES ↗</a>`;
+    if (settingsTab === 'saves' && launcherHistory.recent.length) panel += '<button type="button" class="menu-text-button" data-menu-action="clear-recent">CLEAR RECENT GAMES</button>';
     content.innerHTML = tabs + panel + (inSession() ? '<div class="settings-session-actions"><button type="button" class="menu-text-button" data-menu-action="back">← GAMES</button><button type="button" class="menu-text-button" data-menu-action="restart">↻ RESTART</button><button type="button" class="menu-text-button" data-menu-action="fullscreen">⛶ FULLSCREEN</button></div>' : '');
   }
 }
@@ -206,7 +224,6 @@ function renderSearchResults() {
 }
 
 $('#enter-arcade').addEventListener('click', enterArcade);
-$('#room-help').addEventListener('click', () => openMenu('settings'));
 $('#leave-arcade').addEventListener('click', leaveArcade);
 $('#open-menu').addEventListener('click', () => openMenu('settings'));
 $('#open-search').addEventListener('click', () => openMenu('library'));
@@ -245,8 +262,15 @@ menu.addEventListener('click', event => {
   const tab = event.target.closest('[data-menu-tab]'); if (tab) { menuTab = tab.dataset.menuTab; renderMenu(); return; }
   const settings = event.target.closest('[data-settings-tab]'); if (settings) { settingsTab = settings.dataset.settingsTab; renderMenu(); menu.querySelector(`[data-settings-tab="${settingsTab}"]`)?.focus({ preventScroll: true }); return; }
   const player = event.target.closest('[data-control-player]'); if (player) { controlPlayer = Number(player.dataset.controlPlayer); renderMenu(); menu.querySelector(`[data-control-player="${controlPlayer}"]`)?.focus({ preventScroll: true }); return; }
-  const result = event.target.closest('[data-search-game]'); if (result) { if (inSession()) { session.stop(); setView('browser'); } selectedId = result.dataset.searchGame; search = ''; filter = 'all'; renderLibrary(); closeMenu(); centerSelected(false); return; }
+  const result = event.target.closest('[data-search-game]'); if (result) { if (inSession()) { session.stop(); setView('browser'); } selectedId = result.dataset.searchGame; launcherHistory = rememberSelection(launcherHistory, selectedId, gameIds); saveLauncherHistory(launcherHistory, gameIds); search = ''; filter = 'all'; renderLibrary(); closeMenu(); centerSelected(false); return; }
   const action = event.target.closest('[data-menu-action]')?.dataset.menuAction;
+  if (action === 'clear-recent') {
+    launcherHistory = { ...launcherHistory, recent: [] };
+    const saved = saveLauncherHistory(launcherHistory, gameIds);
+    renderLibrary(); renderMenu();
+    toast(saved ? 'Recent games cleared.' : 'Recent games cleared for this visit.');
+    menu.querySelector('[data-settings-tab="saves"]')?.focus({ preventScroll: true });
+  }
   if (action === 'controls') openMenu('controls');
   if (action === 'back') { closeMenu({ restore: false }); session.stop({ notify: true }); }
   if (action === 'restart') { closeMenu({ restore: false }); session.restart(); }
@@ -279,11 +303,21 @@ document.addEventListener('keydown', event => {
 });
 function updatePadPolling() {
   clearInterval(gamepadTimer); gamepadTimer = null; padPrevious.clear();
-  if (view !== 'browser' || !navigator.getGamepads) return;
+  if (!['attract', 'browser'].includes(view) || !navigator.getGamepads) return;
+  const connectedPad = () => { try { return [...navigator.getGamepads()].find(Boolean); } catch { return null; } };
+  // Seed held buttons when a camera move finishes so Start/A cannot immediately
+  // launch the selected game as well as enter the cabinet.
+  connectedPad()?.buttons.forEach((button, index) => { if (button.pressed) padPrevious.add(index); });
   gamepadTimer = setInterval(() => {
-    if (document.hidden || view !== 'browser') return;
-    const pad = [...navigator.getGamepads()].find(Boolean); if (!pad) return;
+    if (document.hidden || !['attract', 'browser'].includes(view)) return;
+    const pad = connectedPad(); if (!pad) return;
     const down = new Set(); pad.buttons.forEach((b, i) => { if (b.pressed) down.add(i); });
+    if (view === 'attract') {
+      const startPressed = [0, 9].some(id => down.has(id) && !padPrevious.has(id));
+      padPrevious = down;
+      if (startPressed) enterArcade();
+      return;
+    }
     if (isMenuOpen()) {
       const items = [...menu.querySelectorAll('button:not(:disabled), input, a[href], summary')].filter(el => !el.hidden && el.getClientRects().length);
       const direction = down.has(12) || down.has(14) || pad.axes[1] < -.55 || pad.axes[0] < -.55 ? -1 : down.has(13) || down.has(15) || pad.axes[1] > .55 || pad.axes[0] > .55 ? 1 : 0;
@@ -303,4 +337,4 @@ function updatePadPolling() {
 window.addEventListener('pagehide', () => { clearInterval(gamepadTimer); clearTimeout(scrollTimer); clearTimeout(toastTimer); session.dispose(); cabinet.dispose(); });
 window.addEventListener('pageshow', event => { if (event.persisted) location.reload(); });
 window.addEventListener('resize', () => { if (view === 'browser') requestAnimationFrame(() => centerSelected(false)); });
-renderLibrary(); refreshLibrary();
+renderLibrary(); refreshLibrary(); updatePadPolling();
