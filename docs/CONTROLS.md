@@ -4,7 +4,7 @@ Retro Arcade supplies `EJS_defaultControls` before loading EmulatorJS 4.2.3. Eve
 
 ## Player 1
 
-| Input | UMK3 and Resident Evil 3 | Need for Speed and GT2 |
+| Input | Fighting/action/horror games | Need for Speed, GT2 and CTR |
 | --- | --- | --- |
 | D-pad up / down | W / S | I / K (menus) |
 | D-pad left / right | A / D | A / D (steering and menus) |
@@ -25,7 +25,7 @@ The racing profile maps W/S to the original PlayStation face-button pedals. It d
 
 Use arrow keys for directions in UMK3, with numpad 1/2/4/5 for B/A/Y/X, numpad 7/9 for L1/R1, numpad 0/decimal for L2/R2, top-row 6 for coin and top-row 0 for Start. Enable Num Lock. For racing, up/down arrows become throttle/brake, left/right arrows steer, numpad 8/5 navigate menus vertically, numpad 2 is Circle and numpad 4 is Triangle. Cross and Square are the up/down arrows. The top-row digits and numpad digits are distinct keys.
 
-No keyboard key is shared between the two players in either profile. Gamepads retain all existing digital and analog bindings. Smaller keyboards without a numpad can use gamepads or customize Player 2 in Controls. Resident Evil 3 remains single player.
+No keyboard key is shared between the two players in either profile. Gamepads retain all existing digital and analog bindings. Smaller keyboards without a numpad can use gamepads or customize Player 2 in Controls. Resident Evil 3 and Silent Hill remain single player.
 
 ## Existing browser settings and saves
 
@@ -39,7 +39,7 @@ The following are test steps, not claims that they passed:
 
 - **UMK3:** boot, reset Controls if needed, insert P1 coin with 5 and start with Enter; select a fighter with WASD and an action key; verify movement, crouch/jump and all six actions. Insert P2 coin with 6, start with top-row 0, then verify P2 arrows/numpad and simultaneous independent inputs.
 - **NFS:** reset Controls if needed. Use I/K and A/D to navigate, W to confirm and U to go back. Start a single race with default in-game controls; hold W to accelerate, A/D to steer, and S to brake. Test P2 separately in the game's two-player mode if both pads are available.
-- **GT2:** the requested Arcade disc is still missing. The separate supplied Simulation disc can test menus using I/K, A/D and W, then default race pedals/steering with WASD where a race is available. Do not claim that the Simulation disc verifies Arcade or split-screen.
+- **GT2:** choose the installed Arcade or separate Simulation disc. Use I/K, A/D and W for menus, then WASD for the default race pedals/steering. Testing one disc does not verify the other mode or split-screen.
 - **RE3:** reset Controls if needed, use WASD to choose New Game and J to confirm. Verify tank movement/turning and the original face/shoulder actions in a safe early scene. Do not claim that this remapping changes the original game to modern camera-relative controls.
 
 Automated checks cover keyboard conflicts across players, isolated profile objects, retained gamepad/analog labels, correct racing pedals and compatibility of key names with the installed 4.2.3 runtime. Gameplay, physical controllers, sound and simultaneous keyboard rollover require actual testing.
@@ -48,3 +48,10 @@ Automated checks cover keyboard conflicts across players, isolated profile objec
 ## Added single-player PS1 games
 
 Ace Combat 3, Ghost in the Shell and G-Police: Weapons of Justice use the same base keyboard profile as RE3: WASD is the D-pad, J/K/U/I is Cross/Circle/Square/Triangle, Q/E is L1/R1 and R/F is L2/R2. Enter starts/pauses and 5 is Select. These map to the original controller inputs; flight/vehicle actions depend on each game's preset. Their pages hide Player 2 and keep separate save IDs 106/107/108. GT2's new European Arcade disc uses the existing racing profile and ID 103; its US Simulation option keeps ID 104.
+
+Mortal Kombat 4 and Tekken 3 use the same base PS1 profile, with a separate Player
+2 keyboard. Silent Hill is single-player and uses original tank movement. CTR
+uses the racing profile: W accelerates/confirms, S brakes, A/D steers and I/K
+moves vertically through menus. Its original shoulder/face actions remain
+available. Save IDs 109–112 are independent of the earlier games. Four-player
+CTR multitap and physical controller layouts have not been newly certified.

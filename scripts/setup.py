@@ -40,6 +40,10 @@ DISC_TARGETS = {
     'ac3': 'private/roms/ac3/electrosphere.zip',
     'gits': 'private/roms/gits/ghost-in-the-shell.zip',
     'gpolice2': 'private/roms/gpolice2/weapons-of-justice.zip',
+    'mk4': 'private/roms/mk4/mortal-kombat-4.zip',
+    'sh': 'private/roms/sh/silent-hill.zip',
+    'tekken3': 'private/roms/tekken3/tekken-3.zip',
+    'ctr': 'private/roms/ctr/crash-team-racing.zip',
 }
 
 
@@ -83,10 +87,11 @@ def package_umk(files):
     print('UMK3: 26 original ROM parts verified and packaged locally.')
 
 
-def package_disc(cue, target):
-    if target.exists():
+def package_disc(cue, target, replace=False):
+    if target.exists() and not replace:
         print(target.name + ': already installed; kept existing file.')
         return
+    target.parent.mkdir(parents=True, exist_ok=True)
     text = cue.read_text(encoding='utf-8-sig')
     names = re.findall(r'^\s*FILE\s+"([^"]+)"', text, re.IGNORECASE | re.MULTILINE)
     if not names:
@@ -163,12 +168,15 @@ def main():
     parser.add_argument('--source', type=Path, default=Path.home() / 'Downloads/Retro Games')
     parser.add_argument('--disc', type=Path, help='Import one CUE and its referenced BIN tracks.')
     parser.add_argument('--game', choices=tuple(DISC_TARGETS))
+    parser.add_argument('--replace-disc', action='store_true', help='Deliberately rebuild the selected installed disc ZIP from --disc and its matching tracks/SBI.')
     parser.add_argument('--bios', type=Path, help='Import a checksum-verified retail PS1 BIOS.')
     args = parser.parse_args()
     for directory in ('private/roms/umk3', 'private/roms/nfs', 'private/roms/gt2', 'private/roms/re3', 'private/roms/ac3', 'private/roms/gits', 'private/roms/gpolice2', 'private/bios', 'private/gt4/web'):
         (ROOT / directory).mkdir(parents=True, exist_ok=True)
     if bool(args.disc) != bool(args.game):
         raise ValueError('--disc and --game must be used together.')
+    if args.replace_disc and not args.disc:
+        raise ValueError('--replace-disc requires --disc and --game; automatic setup never replaces installed discs.')
     if args.disc or args.bios:
         if args.bios:
             install_bios(args.bios.resolve())
@@ -177,7 +185,7 @@ def main():
             if cue.suffix.lower() != '.cue' or not cue.is_file():
                 raise ValueError('--disc needs an existing .cue file beside its BIN tracks.')
             target = DISC_TARGETS[args.game]
-            package_disc(cue, ROOT / target)
+            package_disc(cue, ROOT / target, replace=args.replace_disc)
         print('Local import complete. Recheck the library or run npm start.')
         return
     source = args.source.resolve()
@@ -206,6 +214,14 @@ def main():
             package_disc(cue, ROOT / DISC_TARGETS['gits'])
         elif 'g-police' in name and 'weapons of justice' in name:
             package_disc(cue, ROOT / DISC_TARGETS['gpolice2'])
+        elif 'mortal kombat 4' in name:
+            package_disc(cue, ROOT / DISC_TARGETS['mk4'])
+        elif 'silent hill' in name:
+            package_disc(cue, ROOT / DISC_TARGETS['sh'])
+        elif 'tekken 3' in name:
+            package_disc(cue, ROOT / DISC_TARGETS['tekken3'])
+        elif 'crash team racing' in name:
+            package_disc(cue, ROOT / DISC_TARGETS['ctr'])
     for bios in [p for p in files if p.name.lower() in BIOS_CHECKSUMS]:
         install_bios(bios)
     local_file = ROOT / 'private/local.json'

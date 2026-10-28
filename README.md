@@ -16,9 +16,9 @@ in this browser; clear it in Settings without affecting game saves or favorites.
 You can enter the cabinet with gamepad A or Start, then release before selecting
 and launching a game.
 
-**Playable tester release:** seven games are available from the public link: UMK3, Need for Speed: High Stakes, Gran Turismo 2, Resident Evil 3, Ace Combat 3, Ghost in the Shell and G-Police: Weapons of Justice. GT2 includes separate Arcade and Simulation launches. Games download from Cloudflare R2 and run in the browser; the cabinet, search, filters, favorites and control guides are included.
+**Playable tester library:** eleven games are available: UMK3, Need for Speed: High Stakes, Gran Turismo 2, Resident Evil 3, Ace Combat 3, Ghost in the Shell, G-Police: Weapons of Justice, Mortal Kombat 4, Silent Hill, Tekken 3 and CTR: Crash Team Racing. GT2 includes separate Arcade and Simulation launches. Games download from Cloudflare R2 and run in the browser; the cabinet, search, filters, favorites and control guides are included. All 93 hosted objects passed public integrity and download checks on 28 October 2026.
 
-**Hosting:** [R2-HOSTING.md](docs/R2-HOSTING.md) documents the 4.81 GB release, upload tool, free-usage assumptions and activation checks. Only games in the verified public manifest can launch. GT4 remains unavailable until its separate browser build is ready.
+**Hosting:** [R2-HOSTING.md](docs/R2-HOSTING.md) documents the verified 7.59 GB release, upload tool, free-usage assumptions and activation checks. Only games in the verified public manifest can launch. GT4 remains unavailable until its separate browser build is ready.
 
 [Open the public tester site](https://lowo209.github.io/retro-arcade/) · [Send tester feedback](https://github.com/lowo209/retro-arcade/issues/new?template=tester-feedback.yml)
 
@@ -73,11 +73,18 @@ Local readiness is computed from installed files on every visit. The public site
 | Need for Speed: High Stakes | EmulatorJS + `pcsx_rearmed` | Supplied PS1 US BIN/CUE (`SLUS_008.26`) and SCPH1001 BIOS installed. A real six-car race, keyboard acceleration/steering, and browser save/load states are verified. Audio, physical controllers, pursuits and split-screen remain unverified. Windows files cannot be used in this PS1 core. |
 | Gran Turismo 2 | EmulatorJS + `pcsx_rearmed` | European PAL Arcade Mode disc is now installed (`SCES_023.80`). The existing US Simulation disc remains separate, with its save ID preserved. See the verification log for current gameplay checks. |
 | Resident Evil 3: Nemesis | EmulatorJS + `pcsx_rearmed` | Supplied US PS1 BIN/CUE (`SLUS_009.23`) installed with the existing verified BIOS. Title menus, Easy Mode startup, the first in-game scene and short WASD input checks are verified. Single player; sustained play, saves and audio remain unverified. |
+| Ace Combat 3: Electrosphere | EmulatorJS + `pcsx_rearmed` | European PAL disc and original PAL front cover installed. Single-player international edition; gameplay checks are recorded in the verification log. |
+| Ghost in the Shell | EmulatorJS + `pcsx_rearmed` | European PAL disc and original PAL front cover installed. Single player; see the verification log for the tested scope. |
+| G-Police: Weapons of Justice | EmulatorJS + `pcsx_rearmed` | European PAL disc and original PAL front cover installed. Single player; see the verification log for the tested scope. |
+| Mortal Kombat 4 | EmulatorJS + `pcsx_rearmed` | Supplied European PAL disc (`SLES_013.49`) and real PAL retail front cover installed. Uses the shared verified PS1 BIOS. |
+| Silent Hill | EmulatorJS + `pcsx_rearmed` | Supplied PAL Uncensored modification (`SLES_015.14`) installed with a real PAL retail front cover. The supplied modification is identified in game details; the cover represents the base retail release. Single player. |
+| Tekken 3 | EmulatorJS + `pcsx_rearmed` | Supplied US Everything Unlocked modification (`SLUS_004.02`) installed with all three CUE tracks, including CD audio, and a real US retail front cover. Unlock behavior is not independently certified. |
+| CTR: Crash Team Racing | EmulatorJS + `pcsx_rearmed` | Supplied European PAL EDC disc (`SCES_021.05`), matching SBI subchannel data and original PAL retail front cover installed. Exact-disc provenance is in [FILES.md](docs/FILES.md). Four-player multitap operation is not certified. |
 | Gran Turismo 4 | Experimental PS2 Web Recomp browser-build mount | Supplied **US ISO** referenced in ignored local config. No compiled browser build. WSL, CMake, Ninja and clang were not available. Upstream demonstrated PAL GT4; the US ISO needs its own build. See [GT4 steps](docs/GT4.md). |
 
 We never fetch ROMs, BIOS files, game-derived C++ or WebAssembly, cracks or game executables. Source setup does not search download sites or launch the supplied PC game.
 
-The new European **Ace Combat 3: Electrosphere**, **Ghost in the Shell** and **G-Police: Weapons of Justice** discs are installed, with original PAL front covers and single-player pages. RE3 remains the existing US installation. There are now 8 library entries; GT4 is still experimental. Cover provenance is in [COVERS.md](docs/COVERS.md).
+There are 12 library entries: eleven installed playable titles and experimental GT4. Real retail cover provenance, including the four new games, is in [COVERS.md](docs/COVERS.md). Installation readiness does not certify every mode, modification, save feature or controller configuration; use the verification log for actual checks.
 
 ## Add or replace your files
 
@@ -95,18 +102,22 @@ private/
     gits/ghost-in-the-shell.zip
     gpolice2/weapons-of-justice.zip
     re3/re3-nemesis.zip       # CUE + BIN tracks, or re3-nemesis.pbp
+    mk4/mortal-kombat-4.zip
+    sh/silent-hill.zip
+    tekken3/tekken-3.zip      # includes all three supplied tracks
+    ctr/crash-team-racing.zip # includes matching CUE, BIN and SBI
   gt4/web/                   # YOUR generated browser build, not in Git
   local.json                # private GT4 disc / build paths
 vendor/emulatorjs/           # locally installed upstream runtime, not in Git
 ```
 
-For a `.bin` + `.cue` PS1 dump, ZIP the CUE and **every track it references**, at the archive root, preserving track filenames. Do not rename just the BIN; the CUE contains those filenames. Name the ZIP as above. The setup script recognizes GT2 Arcade/Simulation, High Stakes/Road Challenge, RE3, Ace Combat 3, Ghost in the Shell and G-Police: Weapons of Justice CUE filenames. Explicit `--game` imports are listed in docs/FILES.md. PBP files can be copied manually to the paths above. The configured PCSX ReARMed core uses the shared verified retail BIOS for these US/PAL discs; region-specific requirements of other cores differ. The actual supplied 4.2.3 PCSX core metadata does not advertise CHD; this integration therefore requires CUE + BIN ZIP or PBP and does not mark a CHD alone as ready. CUE loading is explicitly enabled to preserve track layout and CD audio.
+For a `.bin` + `.cue` PS1 dump, ZIP the CUE and **every track it references**, at the archive root, preserving track filenames. Do not rename just the BIN; the CUE contains those filenames. Name the ZIP as above. The setup script recognizes all installed PS1 titles by their CUE filenames, including MK4, Silent Hill, Tekken 3 and CTR. Explicit `--game` imports and deliberate `--replace-disc` commands are listed in [FILES.md](docs/FILES.md); automatic setup keeps existing installed archives. PBP files can be copied manually for supported games. CTR specifically requires its matching SBI beside the CUE inside the ZIP; a BIN/CUE archive alone is not marked ready. The configured PCSX ReARMed core uses the shared verified retail BIOS for these US/PAL discs; region-specific requirements of other cores differ. The actual supplied 4.2.3 PCSX core metadata does not advertise CHD; this integration therefore does not mark a CHD alone as ready. CUE loading is explicitly enabled to preserve track layout and CD audio.
 
 This integration accepts the US `scph1001.bin` (MD5 **924e392ed05558ffdb115408c263dccf**) or `scph5501.bin` (MD5 **490f666e1afb15b7362b406ed1cea246**), both 524,288 bytes. Your supplied SCPH1001 is verified and installed. Files are kept under their correct BIOS names; do not rename one revision to another. The app selects a verified dump automatically. Other regions need deliberate configuration and testing.
 
-See [FILES.md](docs/FILES.md) for the exact files still needed and one-disc import commands. The same BIOS serves NFS, GT2 and Resident Evil 3.
+See [FILES.md](docs/FILES.md) for the installed editions, exact file requirements and one-disc import commands. The same verified BIOS serves the installed PS1 games.
 
-Your supplied PNG covers and the three sourced PAL JPEG covers live in ignored `private/covers/` and are automatically mounted at the allowlisted cover URLs. The original SVGs remain the source-only fallbacks. Favorites stay in this browser's local storage. Cards have pointer tilt, a moving glow, cover zoom, an action reveal and equivalent keyboard-focus feedback; reduced-motion preferences disable the movement.
+Supplied covers and sourced retail front scans live in ignored `private/covers/` and are automatically mounted at the allowlisted cover URLs. Covers fit inside their cards without cropping the box art. The original SVGs remain the source-only fallbacks. Favorites stay in this browser's local storage; reduced-motion preferences disable decorative movement.
 
 ## Controls and two players
 

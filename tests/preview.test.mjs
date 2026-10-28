@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { buildPreview, normalizeBasePath, PREVIEW_FILES, versionBuildSources } from '../scripts/build-preview.mjs';
-import { siteUrl } from '../public/catalog.js';
+import { GAMES, siteUrl } from '../public/catalog.js';
 
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'arcade-preview-test-'));
@@ -38,7 +38,7 @@ test('public build contains only interface assets and never advertises private g
   try {
     const catalog = await import(pathToFileURL(path.join(result.output, 'catalog.js')));
     const library = await catalog.loadLibrary();
-    assert.equal(library.preview, true); assert.equal(library.games.length, 8);
+    assert.equal(library.preview, true); assert.equal(library.games.length, GAMES.length);
     assert.ok(library.games.every(game => !game.ready && !game.romUrl && !game.biosUrl));
     assert.equal(library.bios, false);
   } finally { globalThis.fetch = originalFetch; }
