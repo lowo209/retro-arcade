@@ -39,7 +39,7 @@ test('hosted build loads a static catalogue and external runtime beneath a Pages
     assert.ok(url.endsWith('/library.json')); assert.ok(!url.includes('/api/'));
     assert.equal(options.cache, 'no-store'); return { ok: true, json: async () => manifest() };
   };
-  try { assert.equal((await catalog.loadLibrary()).games.filter(game => game.ready).length, 7); }
+  try { assert.equal((await catalog.loadLibrary()).games.filter(game => game.ready).length, GAMES.filter(game => !game.experimental).length); }
   finally { globalThis.fetch = original; }
   fs.writeFileSync(path.join(result.output, 'accidental.zip'), 'KEEP_THIS');
   assert.throws(() => buildHosted({ root, manifest: manifest() }), /Unexpected file/);

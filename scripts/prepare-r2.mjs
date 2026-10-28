@@ -19,9 +19,9 @@ export async function prepareR2({ root = ROOT, publicUrl, prefix = 'releases/tes
   }
   function localAsset(url) {
     let file;
-    if (/^\/media\/(umk3|nfs|gt2|re3|ac3|gits|gpolice2)\/[\w.-]+$/.test(url)) file = containedFile(path.join(root, 'private/roms'), url.slice(7));
+    if (/^\/media\/(umk3|nfs|gt2|re3|ac3|gits|gpolice2|mk4|sh|tekken3|ctr)\/[\w.-]+$/.test(url)) file = containedFile(path.join(root, 'private/roms'), url.slice(7));
     else if (/^\/firmware\/scph(1001|5501|5502)\.bin$/.test(url)) file = containedFile(path.join(root, 'private/bios'), path.basename(url));
-    else if (/^\/covers\/(umk3|nfs|gt2|gt4|re3|ac3|gits|gpolice2)\.(png|jpe?g)$/.test(url)) file = containedFile(path.join(root, 'private/covers'), path.basename(url));
+    else if (/^\/covers\/(umk3|nfs|gt2|gt4|re3|ac3|gits|gpolice2|mk4|sh|tekken3|ctr)\.(png|jpe?g)$/.test(url)) file = containedFile(path.join(root, 'private/covers'), path.basename(url));
     return add(url.slice(1), file);
   }
   function game(value) {

@@ -12,6 +12,10 @@ Game files, firmware and your supplied cover images stay in ignored `private/`. 
 | Ace Combat 3: Electrosphere (Europe) | BIN + CUE, `SCES_020.66`, installed as `private/roms/ac3/electrosphere.zip` | No additional files for launch checks. Single player. |
 | Ghost in the Shell (Europe) | BIN + CUE, `SCES_010.50`, installed as `private/roms/gits/ghost-in-the-shell.zip` | No additional files for launch checks. Single player. |
 | G-Police: Weapons of Justice (Europe) | BIN + CUE, `SCES_016.25`, installed as `private/roms/gpolice2/weapons-of-justice.zip` | No additional files for launch checks. Single player. |
+| Mortal Kombat 4 (Europe) | BIN + CUE, `SLES_013.49`, installed as `private/roms/mk4/mortal-kombat-4.zip` | Shared verified PS1 BIOS; no new firmware. |
+| Silent Hill (PAL Uncensored) | Supplied modified BIN + CUE, `SLES_015.14`, installed as `private/roms/sh/silent-hill.zip` | Modification behavior is separate from startup verification. Single player. |
+| Tekken 3 (Everything Unlocked) | Supplied US variant, `SLUS_004.02`, installed as `private/roms/tekken3/tekken-3.zip` with all three tracks | Keep both CD-audio tracks. Unlock behavior is not inferred from the folder name. |
+| CTR: Crash Team Racing (Europe EDC) | BIN + CUE, `SCES_021.05`, installed as `private/roms/ctr/crash-team-racing.zip`, with matching SBI | The PAL subchannel companion must remain inside the ZIP beside its matching CUE. |
 
 ## Shared PlayStation firmware
 
@@ -38,10 +42,14 @@ python scripts/setup.py --game ac3 --disc "C:\path\Ace Combat 3.cue"
 python scripts/setup.py --game gits --disc "C:\path\Ghost in the Shell.cue"
 python scripts/setup.py --game gpolice2 --disc "C:\path\G-Police - Weapons of Justice.cue"
 python scripts/setup.py --game re3 --disc "C:\path\Resident Evil 3 - Nemesis (USA).cue"
+python scripts/setup.py --game mk4 --disc "C:\path\Mortal Kombat 4 (Europe).cue"
+python scripts/setup.py --game sh --disc "C:\path\Silent Hill.cue"
+python scripts/setup.py --game tekken3 --disc "C:\path\Tekken 3 (USA).cue"
+python scripts/setup.py --game ctr --disc "C:\path\CTR.cue"
 python scripts/setup.py --bios "C:\path\SCPH1001.BIN"
 ```
 
-The importer packages each disc privately, preserves track filenames, and refuses to use unknown BIOS bytes. It keeps an existing installed archive; move that archive aside yourself if deliberately replacing it. PBP files can instead be copied as `private/roms/nfs/high-stakes.pbp` or `private/roms/gt2/gt2-arcade.pbp`. The pinned PCSX build does not advertise CHD, so use the formats above.
+The importer packages each disc privately, preserves track filenames, and refuses to use unknown BIOS bytes. It keeps an existing installed archive. Deliberate reimports require the explicit `--replace-disc` flag; keep a backup if replacing a different edition. PBP files can instead be copied as `private/roms/nfs/high-stakes.pbp` or `private/roms/gt2/gt2-arcade.pbp`. The pinned PCSX build does not advertise CHD, so use the formats above. Protected European CTR is accepted as ZIP with matching SBI, rather than a PBP without its subchannel companion.
 
 Resident Evil 3 can alternatively use `private/roms/re3/re3-nemesis.pbp`. It is the original PS1 game, not the modern PC remake, and has no local two-player mode. Your supplied Nemesis cover is installed unchanged at `private/covers/re3.png`; source-only copies keep the original SVG illustration.
 
@@ -61,3 +69,21 @@ The supplied four European CUE/BIN pairs have valid ISO9660 descriptors, whole 2
 The three new original PAL front-cover scans are stored privately as `ac3.jpg`, `gits.jpg` and `gpolice2.jpg`. See [COVERS.md](COVERS.md) for source galleries, dimensions and hashes. Existing five covers are untouched. PNG/JPEG lookup uses explicit game IDs and correct MIME types. The source-only edition uses an original generic illustration when private artwork is absent.
 
 Some PAL releases need a matching `.sbi` subchannel file as explained in [PCSX ReARMed's documentation](https://docs.libretro.com/library/pcsx_rearmed/#playing-pal-copy-protected-games). The importer now includes an already supplied SBI beside its matching CUE. It never downloads or synthesizes one. None accompanied these four dumps. A title screen alone does not establish full compatibility; see [VERIFICATION.md](VERIFICATION.md).
+
+## CTR European EDC subchannel companion
+
+The 28 October CTR folder contained no SBI. Its BIN has MD5
+`721fce296675c5a10922d6ffab86c73b` and boot ID `SCES_021.05`. After the owner
+asked how to obtain the companion, the **EDC version** entry on
+[PSX Data Center's SBI page](https://psxdatacenter.com/sbifiles.html) supplied
+`SCES_021.05.sbi`: 452 bytes, header `SBI\0`, 32 records, SHA-256
+`37f6afed4656d772754348be73dd01a77b8d1abda5b03ea0cdc279d7eb8c24c7`.
+This is subchannel metadata, not another game image or a game executable.
+
+The original SBI bytes were retained and named to match the installed CUE stem
+inside the installed disc ZIP before its first upload. Supplied BIN/CUE bytes and Downloads were not
+changed. The server checks for a bounded, well-formed SBI entry with the same
+CUE stem before declaring this protected PAL disc ready. For a future deliberate
+reimport, keep the matching `.sbi` beside that exact CUE and all its BIN tracks,
+then use `--game ctr --disc ... --replace-disc`. The setup script itself performs
+no network retrieval.

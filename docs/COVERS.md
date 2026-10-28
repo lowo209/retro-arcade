@@ -23,3 +23,34 @@ gpolice2.jpg  57f99c5fbb84574a4f85f40fa1c3345f53f48b71f4d6c864f5cd295f0381f790
 ```
 
 Source galleries can change. This records the exact images inspected for this local update and does not claim publisher affiliation or public distribution permission.
+
+## 28 October 2026 — Four more PlayStation covers
+
+These are the original retail front-cover images from LaunchBox's **Box - Front**
+category, rather than fan art, recreated boxes, back covers or remake artwork.
+Each downloaded file was visually opened and checked for its game title,
+PlayStation branding and PAL or NTSC U/C mark. The original PNG/JPEG bytes are
+kept unchanged under ignored `private/covers/`; no image generation, editing or
+re-encoding was used.
+
+| Game | Private file | Dimensions | Source page | Original image |
+| --- | --- | --- | --- | --- |
+| Mortal Kombat 4 | `private/covers/mk4.png` | 1446 × 1492 | [LaunchBox gallery](https://gamesdb.launchbox-app.com/games/images/8028-mortal-kombat-4) | [European PAL front PNG](https://images.launchbox-app.com/d354e5d5-b334-4bb5-90ec-78c16ff6faec.png) |
+| Silent Hill | `private/covers/sh.jpg` | 1481 × 1477 | [LaunchBox gallery](https://gamesdb.launchbox-app.com/games/images/984-silent-hill) | [European PAL front JPEG](https://images.launchbox-app.com/03719d84-ae48-41bb-8ece-1e403c09cee2.jpg) |
+| Tekken 3 | `private/covers/tekken3.jpg` | 640 × 623 | [LaunchBox gallery](https://gamesdb.launchbox-app.com/games/images/2414-tekken-3) | [North American NTSC U/C front JPEG](https://images.launchbox-app.com/6044b892-aa53-4f9b-bdc1-f90268c02321.jpg) |
+| CTR: Crash Team Racing | `private/covers/ctr.jpg` | 1500 × 1500 | [LaunchBox gallery](https://gamesdb.launchbox-app.com/games/images/977-ctr-crash-team-racing) | [European PAL front JPEG](https://images.launchbox-app.com/r2_c5cfa63a-7449-42b9-82bb-068a4a1a2a06.jpg) |
+
+The Tekken scan is the green-label North American retail cover. Silent Hill and
+Tekken use original retail artwork for the base titles; the supplied
+“Uncensored” and “Everything Unlocked” disc variants do not become invented
+special-edition box art. The CTR cover is the original PlayStation game, not
+Nitro-Fueled. Artwork remains separate from the website's MIT licence.
+
+SHA-256 of the unchanged downloaded bytes:
+
+```text
+mk4.png      828d5f3dd3242be8a0632aa7403d91e9fc535b373477d4dabf1b628bd9600129
+sh.jpg       cbb2869014c11b222161249de7d909487b219fd1290e012f6c48f66fa52b5e90
+tekken3.jpg  2804179aca8f061f944cec4e8a628f3ecc44e7fefe2558924fce04d0a5f0b6a0
+ctr.jpg      89a56abe5f17bdcdf6ee9b638a95684e4d8a650bb22341869992dbd70cf26719
+```

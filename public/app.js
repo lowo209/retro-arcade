@@ -176,7 +176,7 @@ function launch(variant = 'primary') {
 function keyLabel(value) { return ({ 'up arrow': '↑', 'down arrow': '↓', 'left arrow': '←', 'right arrow': '→', enter: 'ENTER', 'decimal point': 'NUM .' }[value] || value.replace('numpad ', 'NUM ').toUpperCase()); }
 function controlLabel(control, id) {
   const labels = id === 'umk3' ? { 0: 'Action B', 1: 'Action Y', 2: 'Insert coin', 8: 'Action A', 9: 'Action X', 10: 'Action L', 11: 'Action R' } : { 0: 'Cross ×', 1: 'Square □', 2: 'Select', 8: 'Circle ○', 9: 'Triangle △', 10: 'L1', 11: 'R1' };
-  return (id === 'nfs' || id === 'gt2') && ({ 0: 'Throttle / confirm', 1: 'Brake', 4: 'Menu up', 5: 'Menu down', 6: 'Steer left', 7: 'Steer right' })[control.id] || labels[control.id] || control.label;
+  return (id === 'nfs' || id === 'gt2' || id === 'ctr') && ({ 0: 'Throttle / confirm', 1: 'Brake', 4: 'Menu up', 5: 'Menu down', 6: 'Steer left', 7: 'Steer right' })[control.id] || labels[control.id] || control.label;
 }
 function menuGame() { return inSession() && session.current?.game || selectedGame(); }
 function openMenu(tab = 'library') {
@@ -215,6 +215,11 @@ function renderMenu() {
     if (settingsTab === 'saves') panel = `<p>Save, load and export from the game’s toolbar. Saves stay in this browser; export a backup before clearing browser data.</p>${game.id === 'umk3' ? '<p class="menu-warning">UMK3 save states are unavailable.</p>' : ''}<a class="menu-link" href="${githubUrl}#readme" target="_blank" rel="noopener noreferrer">HOW IT WORKS ↗</a><a class="menu-link" href="${siteUrl('guides/browser.html')}" target="_blank" rel="noopener noreferrer">PICTURE & SOUND HELP ↗</a>${FEEDBACK_URL ? `<a class="menu-link" href="${esc(FEEDBACK_URL)}" target="_blank" rel="noopener noreferrer">REPORT A PROBLEM ↗</a>` : ''}<a class="menu-link" href="${siteUrl('software.html')}" target="_blank" rel="noopener noreferrer">LICENSES ↗</a>`;
     if (settingsTab === 'saves' && launcherHistory.recent.length) panel += '<button type="button" class="menu-text-button" data-menu-action="clear-recent">CLEAR RECENT GAMES</button>';
     content.innerHTML = tabs + panel + (inSession() ? '<div class="settings-session-actions"><button type="button" class="menu-text-button" data-menu-action="back">← GAMES</button><button type="button" class="menu-text-button" data-menu-action="restart">↻ RESTART</button><button type="button" class="menu-text-button" data-menu-action="fullscreen">⛶ FULLSCREEN</button></div>' : '');
+  }
+  if (menuTab === 'game' && game.edition) {
+    const edition = document.createElement('span');
+    edition.textContent = game.edition;
+    content.querySelector('.menu-tag-row')?.append(edition);
   }
 }
 function renderSearchResults() {

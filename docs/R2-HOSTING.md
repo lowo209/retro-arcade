@@ -3,13 +3,17 @@
 The selected setup is GitHub Pages for the website and Cloudflare R2 **Standard**
 for the operator-authorized game files, BIOS, covers and emulator distribution.
 The operator confirmed permission to distribute these assets for testing.
-The redesign is deferred. Seven games are ready locally; GT4 has no browser build
-and stays unavailable. Multiplayer means two players on the same device.
+The website is an interactive 3D arcade cabinet with a cover carousel and a
+toggleable CRT effect. Eleven titles are ready locally; GT4 has no browser build
+and stays unavailable. GT2 also has a separate Simulation disc. Multiplayer means
+two players on the same device; CTR's four-player multitap mode is not certified.
 
 ## Cost and access
 
-The prepared release is 4,805,262,832 bytes (about 4.81 GB), including emulator
-source archives and notices, across 85 objects. R2 Standard currently includes
+The verified release is 7,590,899,528 bytes (about 7.59 GB), including emulator
+source archives and notices, across 93 objects. This adds four disc ZIPs and four
+real retail covers to the previous 85-object release; its unchanged objects are
+reused under the same release prefix rather than copied. R2 Standard currently includes
 10 GB-month, one million Class A operations and ten million Class B operations
 per month, account-wide. Internet egress is free. Above the allowance, prices are
 $0.015/GB-month, $4.50/million Class A and $0.36/million Class B operations.
@@ -113,7 +117,16 @@ the builder's output directory. Game binaries remain outside Git and Pages.
 A staged release may include only completed, verified game uploads. Games still
 uploading have `ready: false`, no download URL, and an explanatory message; every
 runtime, source, firmware and cover prerequisite must still pass verification.
-The full release replaces that manifest after all 85 objects pass checks.
+The full release replaces that manifest after all 93 objects pass checks.
+
+The four additions are Mortal Kombat 4 (PAL), the supplied PAL Uncensored Silent
+Hill modification, the supplied US Everything Unlocked Tekken 3 modification,
+and European PAL EDC CTR. Tekken retains all three supplied tracks. CTR's ZIP
+includes the matching, exact-disc SBI subchannel data; the local readiness check
+rejects a missing or malformed matching SBI. Disc/SBI provenance is documented in
+[FILES.md](FILES.md), and real retail cover sources are in [COVERS.md](COVERS.md).
+Readiness and successful remote file checks do not certify a modification's
+behavior or replace game-level testing.
 
 To preview the playable output locally, set `PREVIEW_DIRECTORY=dist-playable` and
 `PREVIEW_PORT=4174`, then run `npm run preview`. The project prefix is read from

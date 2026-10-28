@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { pipeline } from 'node:stream/promises';
 import { createHash } from 'node:crypto';
+import { inflateRawSync } from 'node:zlib';
 
 export const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.wasm': 'application/wasm', '.txt': 'text/plain; charset=utf-8' };
@@ -22,6 +23,62 @@ function config(root) {
   catch { return {}; }
 }
 function first(root, names) { return names.map(n => path.join(root, n)).find(exists); }
+// CTR's PAL disc needs its matching subchannel data. Inspect only the bounded
+// ZIP directory and small SBI entry, not the hundreds of MB of game tracks.
+export function hasMatchingSbi(file) {
+  let descriptor;
+  try {
+    descriptor = fs.openSync(file, 'r');
+    const size = fs.fstatSync(descriptor).size;
+    if (size < 22) return false;
+    const read = (offset, length) => {
+      if (!Number.isSafeInteger(offset) || offset < 0 || length < 0 || offset + length > size) throw Error('Invalid ZIP range');
+      const data = Buffer.alloc(length);
+      if (fs.readSync(descriptor, data, 0, length, offset) !== length) throw Error('Incomplete ZIP');
+      return data;
+    };
+    const tail = read(Math.max(0, size - 65557), Math.min(size, 65557));
+    let end = -1;
+    for (let i = tail.length - 22; i >= 0; i--) {
+      if (tail.readUInt32LE(i) === 0x06054b50 && i + 22 + tail.readUInt16LE(i + 20) === tail.length) { end = i; break; }
+    }
+    if (end < 0 || tail.readUInt16LE(end + 4) || tail.readUInt16LE(end + 6)) return false;
+    const count = tail.readUInt16LE(end + 10), length = tail.readUInt32LE(end + 12), offset = tail.readUInt32LE(end + 16);
+    if (!count || count > 512 || count !== tail.readUInt16LE(end + 8) || length > 1024 * 1024 || offset + length > size - 22) return false;
+    const directory = read(offset, length), entries = [];
+    let position = 0;
+    for (let i = 0; i < count; i++) {
+      if (position + 46 > directory.length || directory.readUInt32LE(position) !== 0x02014b50) return false;
+      const nameLength = directory.readUInt16LE(position + 28), extra = directory.readUInt16LE(position + 30), comment = directory.readUInt16LE(position + 32);
+      const next = position + 46 + nameLength + extra + comment;
+      if (next > directory.length) return false;
+      const name = directory.subarray(position + 46, position + 46 + nameLength).toString('utf8');
+      entries.push({ name, flags: directory.readUInt16LE(position + 8), method: directory.readUInt16LE(position + 10), packed: directory.readUInt32LE(position + 20), bytes: directory.readUInt32LE(position + 24), offset: directory.readUInt32LE(position + 42) });
+      position = next;
+    }
+    const cue = entries.find(entry => !entry.name.includes('/') && !entry.name.includes('\\') && /\.cue$/i.test(entry.name));
+    if (!cue) return false;
+    const matching = cue.name.replace(/\.cue$/i, '.sbi').toLowerCase();
+    const sbi = entries.find(entry => entry.name.toLowerCase() === matching);
+    if (!sbi || sbi.flags & 1 || ![0, 8].includes(sbi.method) || sbi.bytes < 18 || sbi.bytes > 65536 || sbi.packed > 65536) return false;
+    const local = read(sbi.offset, 30);
+    if (local.readUInt32LE(0) !== 0x04034b50 || local.readUInt16LE(8) !== sbi.method) return false;
+    const name = read(sbi.offset + 30, local.readUInt16LE(26));
+    if (name.toString('utf8') !== sbi.name) return false;
+    const data = read(sbi.offset + 30 + name.length + local.readUInt16LE(28), sbi.packed);
+    const payload = sbi.method === 8 ? inflateRawSync(data, { maxOutputLength: 65536 }) : data;
+    if (payload.length !== sbi.bytes || !payload.subarray(0, 4).equals(Buffer.from([83, 66, 73, 0]))) return false;
+    let record = 4;
+    while (record < payload.length) {
+      if (record + 4 > payload.length) return false;
+      const type = payload[record + 3], bytes = type === 1 ? 10 : type === 2 || type === 3 ? 3 : 0;
+      if (!bytes) return false;
+      record += 4 + bytes;
+    }
+    return record === payload.length;
+  } catch { return false; }
+  finally { if (descriptor !== undefined) fs.closeSync(descriptor); }
+}
 const BIOS_CHECKSUMS = {
   'scph5501.bin': '490f666e1afb15b7362b406ed1cea246',
   'scph1001.bin': '924e392ed05558ffdb115408c263dccf',
@@ -52,6 +109,10 @@ export function inspectLibrary(root = ROOT) {
   const ac3 = first(root, ['private/roms/ac3/electrosphere.pbp', 'private/roms/ac3/electrosphere.zip']);
   const gits = first(root, ['private/roms/gits/ghost-in-the-shell.pbp', 'private/roms/gits/ghost-in-the-shell.zip']);
   const gpolice2 = first(root, ['private/roms/gpolice2/weapons-of-justice.pbp', 'private/roms/gpolice2/weapons-of-justice.zip']);
+  const mk4 = first(root, ['private/roms/mk4/mortal-kombat-4.pbp', 'private/roms/mk4/mortal-kombat-4.zip']);
+  const sh = first(root, ['private/roms/sh/silent-hill.pbp', 'private/roms/sh/silent-hill.zip']);
+  const tekken3 = first(root, ['private/roms/tekken3/tekken-3.pbp', 'private/roms/tekken3/tekken-3.zip']);
+  const ctr = first(root, ['private/roms/ctr/crash-team-racing.zip']);
   const gt4dir = path.resolve(root, local.gt4?.buildDirectory || 'private/gt4/web');
   const gt4disc = path.resolve(root, local.gt4?.disc || 'private/gt4/disc.iso');
   const gt4ready = ['ps2web.html', 'ps2web.js', 'ps2web.wasm', 'ps2web.data'].every(f => exists(path.join(gt4dir, f))) && exists(gt4disc);
@@ -70,8 +131,19 @@ export function inspectLibrary(root = ROOT) {
     makePSX('ac3', ac3, 'European PAL Ace Combat 3 disc', 'Europe'),
     makePSX('gits', gits, 'European PAL Ghost in the Shell disc', 'Europe'),
     makePSX('gpolice2', gpolice2, 'European PAL G-Police: Weapons of Justice disc', 'Europe'),
+    makePSX('mk4', mk4, 'European PAL Mortal Kombat 4 disc', 'Europe'),
+    makePSX('sh', sh, 'Supplied PAL Uncensored Silent Hill disc', 'Europe'),
+    makePSX('tekken3', tekken3, 'Supplied US Everything Unlocked Tekken 3 disc'),
+    makePSX('ctr', ctr, 'European PAL Crash Team Racing disc', 'Europe'),
   ];
   if (sim) games[2].alternate = { ...makePSX('gt2', sim, 'US Simulation Mode disc'), label: 'Simulation Mode', warning: 'This separate US Simulation disc has its own saves. The main launch uses the European Arcade disc.' };
+  const kart = games.find(game => game.id === 'ctr');
+  const subchannel = !!ctr && hasMatchingSbi(ctr);
+  kart.requirements.push({ label: 'Matching PAL SBI subchannel file inside the disc ZIP', present: subchannel });
+  if (ctr && !subchannel) {
+    kart.ready = false;
+    kart.reason = 'This PAL Crash Team Racing disc needs its matching SBI subchannel file beside the CUE inside the ZIP. Add that file and deliberately re-import the archive; the supplied BIN/CUE alone is incomplete.';
+  }
   for (const game of games) {
     const cover = first(root, ['png', 'jpg', 'jpeg'].map(extension => `private/covers/${game.id}.${extension}`));
     if (cover) game.coverUrl = `/covers/${path.basename(cover)}`;
@@ -120,11 +192,11 @@ export function createArcadeServer(root = ROOT) {
       let file;
       if (pathname.startsWith('/vendor/emulatorjs/')) file = containedFile(path.join(root, 'vendor/emulatorjs'), pathname.slice('/vendor/emulatorjs/'.length));
       else if (pathname.startsWith('/media/')) {
-        const match = /^\/media\/(umk3|nfs|gt2|re3|ac3|gits|gpolice2)\/([^/]+)$/.exec(pathname);
-        const allowed = { umk3: ['umk3.zip'], nfs: ['high-stakes.pbp', 'high-stakes.zip'], gt2: ['gt2-arcade.pbp', 'gt2-arcade.zip', 'gt2-simulation.zip'], re3: ['re3-nemesis.pbp', 're3-nemesis.zip'], ac3: ['electrosphere.zip', 'electrosphere.pbp'], gits: ['ghost-in-the-shell.zip', 'ghost-in-the-shell.pbp'], gpolice2: ['weapons-of-justice.zip', 'weapons-of-justice.pbp'] };
+        const match = /^\/media\/(umk3|nfs|gt2|re3|ac3|gits|gpolice2|mk4|sh|tekken3|ctr)\/([^/]+)$/.exec(pathname);
+        const allowed = { umk3: ['umk3.zip'], nfs: ['high-stakes.pbp', 'high-stakes.zip'], gt2: ['gt2-arcade.pbp', 'gt2-arcade.zip', 'gt2-simulation.zip'], re3: ['re3-nemesis.pbp', 're3-nemesis.zip'], ac3: ['electrosphere.zip', 'electrosphere.pbp'], gits: ['ghost-in-the-shell.zip', 'ghost-in-the-shell.pbp'], gpolice2: ['weapons-of-justice.zip', 'weapons-of-justice.pbp'], mk4: ['mortal-kombat-4.zip', 'mortal-kombat-4.pbp'], sh: ['silent-hill.zip', 'silent-hill.pbp'], tekken3: ['tekken-3.zip', 'tekken-3.pbp'], ctr: ['crash-team-racing.zip'] };
         if (match && allowed[match[1]].includes(match[2])) file = containedFile(path.join(root, 'private/roms', match[1]), match[2]);
       } else if (/^\/firmware\/(scph5501|scph1001|scph5502)\.bin$/.test(pathname)) file = containedFile(path.join(root, 'private/bios'), path.basename(pathname));
-      else if (/^\/covers\/(umk3|nfs|gt2|gt4|re3|ac3|gits|gpolice2)\.(png|jpe?g)$/.test(pathname)) file = containedFile(path.join(root, 'private/covers'), path.basename(pathname));
+      else if (/^\/covers\/(umk3|nfs|gt2|gt4|re3|ac3|gits|gpolice2|mk4|sh|tekken3|ctr)\.(png|jpe?g)$/.test(pathname)) file = containedFile(path.join(root, 'private/covers'), path.basename(pathname));
       else if (pathname.startsWith('/experimental/gt4/')) {
         const local = config(root);
         const relative = pathname.slice('/experimental/gt4/'.length);

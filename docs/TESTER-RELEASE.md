@@ -2,22 +2,34 @@
 
 Open **[Retro Arcade](https://lowo209.github.io/retro-arcade/)** in a browser,
 press **Start** to enter the cabinet, browse to an available game, and click
-**Play game**. Search, game information, controls and help are in the screen's
+**Play**. Search, game information, controls and help are in the screen's
 menu. No installation is needed.
 Games and the emulator download from Cloudflare R2 and run on the visitor's
 device. First PlayStation downloads are roughly 500–750 MB, so allow a few
 minutes on slower connections. The library shows the current availability.
 
-The verified full release contains UMK3, Need for Speed: High Stakes, Gran
-Turismo 2 (Arcade and separate Simulation discs), Resident Evil 3, Ace Combat 3,
-Ghost in the Shell and G-Police: Weapons of Justice. All 85 hosted objects passed
-public integrity, CORS and download checks on 24 October 2026.
+The verified expanded release contains eleven playable titles: UMK3, Need for
+Speed: High Stakes, Gran Turismo 2 (Arcade and separate Simulation discs),
+Resident Evil 3, Ace Combat 3, Ghost in the Shell, G-Police: Weapons of Justice,
+Mortal Kombat 4, Silent Hill, Tekken 3 and CTR: Crash Team Racing. There are 12
+library entries including unavailable GT4. Its 93 hosted objects total about
+7.59 GB and passed public integrity, CORS and download checks on 28 October 2026.
+The verified public manifest enables the additions. Silent Hill and Tekken identify the supplied
+modifications in game details. CTR includes matching PAL EDC SBI subchannel data.
+All four additions use real retail front covers; provenance is in
+[COVERS.md](COVERS.md) and [FILES.md](FILES.md).
+
+The current design keeps the arcade cabinet and **Start** on the opening screen,
+then zooms into a game-first cover carousel inside the CRT. Gameplay fills the
+rounded monitor bezel with a small icon dock. The saved CRT effect can be toggled
+in **Settings → Display**; controls and further information stay in the menu.
 
 Multiplayer uses two players on the same device. Click inside the running player
 before using its controls. Progress stays in that browser profile at this
 website address; use the emulator's export controls to keep a backup. UMK3 save
 states are unavailable with the installed core. GT4 remains unavailable because
-its separate browser build is not ready. The redesign is deferred.
+its separate browser build is not ready. CTR's four-player multitap mode is not
+certified. See [VERIFICATION.md](VERIFICATION.md) for the actual game-level checks.
 
 Report problems through the **[tester issue form](https://github.com/lowo209/retro-arcade/issues/new?template=tester-feedback.yml)**,
 including the game and mode, browser/device, steps and any error shown. The form
