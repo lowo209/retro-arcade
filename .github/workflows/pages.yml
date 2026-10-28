@@ -22,6 +22,8 @@ jobs:
           node-version: '22'
       - name: Run regression checks
         run: npm test
+      - name: Check upload storage budget
+        run: npm run test:upload-budget
       - name: Check source publication boundaries
         run: npm run check
       - name: Configure Pages

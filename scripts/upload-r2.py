@@ -7,6 +7,7 @@ import argparse, hashlib, json, secrets, sys, threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
+from r2_upload_budget import UploadBudgetError, check_upload_budget
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / '.local/python-deps'))
@@ -41,6 +42,9 @@ def upload(access, secret):
             aws_access_key_id=access, aws_secret_access_key=secret, region_name='auto',
             config=Config(signature_version='s3v4', retries={'max_attempts':4,'mode':'standard'},
                           request_checksum_calculation='when_required', response_checksum_validation='when_required'))
+        with lock: state['current'] = 'Checking existing bucket storage and incomplete uploads'
+        budget = check_upload_budget(client, args.bucket, plan['files'])
+        print(f"Storage guard: projected {budget['projected_bytes']/1e9:.2f}/{budget['limit_bytes']/1e9:.2f} GB; no files deleted.", flush=True)
         transfer = TransferConfig(multipart_threshold=32*1024*1024, multipart_chunksize=32*1024*1024, max_concurrency=2)
         # Runtime/cover/source objects first, then the large game archives.
         files = sorted(plan['files'], key=lambda item: (item['bytes'] > 20_000_000, item['bytes']))
@@ -73,7 +77,9 @@ def upload(access, secret):
     except Exception as error:
         code = error.response.get('Error',{}).get('Code','UploadError') if isinstance(error,ClientError) else type(error).__name__
         # Avoid serializing SDK errors, request headers, or credentials.
-        with lock: state['phase']='failed'; state['error']=f'Upload stopped ({code}). Check the bucket-scoped key and retry; matching completed objects will be skipped.'
+        with lock:
+            state['phase']='failed'
+            state['error'] = f'Upload blocked: {error}' if isinstance(error, UploadBudgetError) else f'Upload stopped ({code}). Check the bucket-scoped key and retry; matching completed objects will be skipped.'
         print('Upload stopped:',code,flush=True)
     finally:
         if client: client.close()

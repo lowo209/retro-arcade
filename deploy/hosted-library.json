@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "hosted": true,
-  "assetBase": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/",
-  "verifiedAt": "2026-10-28T14:51:39.065Z",
+  "assetBase": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/",
+  "verifiedAt": "2026-10-28T16:05:40.093Z",
   "runtime": true,
   "bios": true,
   "biosName": "scph1001.bin",
@@ -12,9 +12,9 @@
       "ready": true,
       "experimental": false,
       "reason": "",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/umk3.png",
       "core": "mame2003_plus",
-      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/umk3/umk3.zip",
+      "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/umk3/umk3.zip",
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/umk3.png",
       "downloadBytes": 22386949
     },
     {
@@ -22,24 +22,24 @@
       "ready": true,
       "experimental": false,
       "reason": "",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/nfs.png",
       "core": "pcsx_rearmed",
       "region": "US",
-      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/nfs/high-stakes.zip",
-      "downloadBytes": 733165836,
-      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin"
+      "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/nfs/high-stakes.zip",
+      "biosUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/firmware/scph1001.bin",
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/nfs.png",
+      "downloadBytes": 733165836
     },
     {
       "id": "gt2",
       "ready": true,
       "experimental": false,
       "reason": "",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/gt2.png",
       "core": "pcsx_rearmed",
       "region": "Europe",
-      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/gt2/gt2-arcade.zip",
+      "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/gt2/gt2-arcade.zip",
+      "biosUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/firmware/scph1001.bin",
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/gt2.png",
       "downloadBytes": 667966219,
-      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin",
       "alternate": {
         "id": "gt2",
         "ready": true,
@@ -47,9 +47,9 @@
         "reason": "",
         "core": "pcsx_rearmed",
         "region": "US",
-        "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/gt2/gt2-simulation.zip",
+        "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/gt2/gt2-simulation.zip",
+        "biosUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/firmware/scph1001.bin",
         "downloadBytes": 691850659,
-        "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin",
         "label": "Simulation Mode",
         "warning": "This separate US Simulation disc has its own saves. The main launch uses the European Arcade disc."
       }
@@ -59,103 +59,103 @@
       "ready": false,
       "experimental": true,
       "reason": "Gran Turismo 4 needs a separate browser build and is coming later.",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/gt4.png"
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/gt4.png"
     },
     {
       "id": "re3",
       "ready": true,
       "experimental": false,
       "reason": "",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/re3.png",
       "core": "pcsx_rearmed",
       "region": "US",
-      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/re3/re3-nemesis.zip",
-      "downloadBytes": 722165547,
-      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin"
+      "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/re3/re3-nemesis.zip",
+      "biosUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/firmware/scph1001.bin",
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/re3.png",
+      "downloadBytes": 722165547
     },
     {
       "id": "ac3",
       "ready": true,
       "experimental": false,
       "reason": "",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/ac3.jpg",
       "core": "pcsx_rearmed",
       "region": "Europe",
-      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/ac3/electrosphere.zip",
-      "downloadBytes": 471000286,
-      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin"
+      "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/ac3/electrosphere.zip",
+      "biosUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/firmware/scph1001.bin",
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/ac3.jpg",
+      "downloadBytes": 471000286
     },
     {
       "id": "gits",
       "ready": true,
       "experimental": false,
       "reason": "",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/gits.jpg",
       "core": "pcsx_rearmed",
       "region": "Europe",
-      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/gits/ghost-in-the-shell.zip",
-      "downloadBytes": 655620391,
-      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin"
+      "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/gits/ghost-in-the-shell.zip",
+      "biosUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/firmware/scph1001.bin",
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/gits.jpg",
+      "downloadBytes": 655620391
     },
     {
       "id": "gpolice2",
       "ready": true,
       "experimental": false,
       "reason": "",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/gpolice2.jpg",
       "core": "pcsx_rearmed",
       "region": "Europe",
-      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/gpolice2/weapons-of-justice.zip",
-      "downloadBytes": 701479742,
-      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin"
+      "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/gpolice2/weapons-of-justice.zip",
+      "biosUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/firmware/scph1001.bin",
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/gpolice2.jpg",
+      "downloadBytes": 701479742
     },
     {
       "id": "mk4",
       "ready": true,
       "experimental": false,
       "reason": "",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/mk4.png",
       "core": "pcsx_rearmed",
       "region": "Europe",
-      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/mk4/mortal-kombat-4.zip",
-      "downloadBytes": 718183576,
-      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin"
+      "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/mk4/mortal-kombat-4.zip",
+      "biosUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/firmware/scph1001.bin",
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/mk4.png",
+      "downloadBytes": 718183576
     },
     {
       "id": "sh",
       "ready": true,
       "experimental": false,
       "reason": "",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/sh.jpg",
       "core": "pcsx_rearmed",
       "region": "Europe",
-      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/sh/silent-hill.zip",
-      "downloadBytes": 634878218,
-      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin"
+      "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/sh/silent-hill.zip",
+      "biosUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/firmware/scph1001.bin",
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/sh.jpg",
+      "downloadBytes": 634878218
     },
     {
       "id": "tekken3",
       "ready": true,
       "experimental": false,
       "reason": "",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/tekken3.jpg",
       "core": "pcsx_rearmed",
       "region": "US",
-      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/tekken3/tekken-3.zip",
-      "downloadBytes": 688278356,
-      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin"
+      "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/tekken3/tekken-3.zip",
+      "biosUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/firmware/scph1001.bin",
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/tekken3.jpg",
+      "downloadBytes": 688278356
     },
     {
       "id": "ctr",
       "ready": true,
       "experimental": false,
       "reason": "",
-      "coverUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/covers/ctr.jpg",
       "core": "pcsx_rearmed",
       "region": "Europe",
-      "romUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/media/ctr/crash-team-racing.zip",
-      "downloadBytes": 740180302,
-      "biosUrl": "https://pub-07535dd679a54683bbf818038dc24263.r2.dev/releases/tester-v1/firmware/scph1001.bin"
+      "romUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/media/ctr/crash-team-racing.zip",
+      "biosUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/firmware/scph1001.bin",
+      "coverUrl": "https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/releases/tester-v1/covers/ctr.jpg",
+      "downloadBytes": 740180302
     }
   ]
 }

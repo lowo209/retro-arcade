@@ -20,6 +20,8 @@ and launching a game.
 
 **Hosting:** [R2-HOSTING.md](docs/R2-HOSTING.md) documents the verified 7.59 GB release, upload tool, free-usage assumptions and activation checks. Only games in the verified public manifest can launch. GT4 remains unavailable until its separate browser build is ready.
 
+**Cost controls:** Downloads use a Workers Free gateway with a daily request cutoff; the uploader refuses projected bucket storage above 9 GB. The direct R2 endpoint must stay disabled. [COST-LIMIT.md](docs/COST-LIMIT.md) explains the safeguard and its scope: it targets zero visitor-traffic charges, rather than imposing an account-wide EUR 1 billing cap.
+
 [Open the public tester site](https://lowo209.github.io/retro-arcade/) · [Send tester feedback](https://github.com/lowo209/retro-arcade/issues/new?template=tester-feedback.yml)
 
 If every game fails with a WebGL/GLctx error in Firefox, see the local [browser graphics guide](public/guides/browser.html). The player now checks graphics availability before loading a disc and reports caught emulator startup errors.
