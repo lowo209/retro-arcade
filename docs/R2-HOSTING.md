@@ -10,6 +10,12 @@ two players on the same device; CTR's four-player multitap mode is not certified
 
 ## Cost and access
 
+The owner selected a maximum of EUR 1 per month. A Workers Free download gateway
+targets zero visitor-traffic charges: see [COST-LIMIT.md](COST-LIMIT.md). Its daily
+request cutoff stops new downloads if exhausted. Keep the direct R2 endpoint
+disabled so it cannot bypass the cutoff. This is a website-traffic safeguard,
+not an account-wide currency cap. An email budget alert alone is not a cap.
+
 The verified release is 7,590,899,528 bytes (about 7.59 GB), including emulator
 source archives and notices, across 93 objects. This adds four disc ZIPs and four
 real retail covers to the previous 85-object release; its unchanged objects are
@@ -20,9 +26,10 @@ $0.015/GB-month, $4.50/million Class A and $0.36/million Class B operations.
 Billing units round up. This is an expected $0 small-test setup, not a spending cap.
 Other buckets, retained releases and unfinished multipart uploads consume storage.
 
-Use the free `r2.dev` public development URL initially. It is rate-limited and is
-intended for testing. A production release should use a custom domain and revisit
-traffic, caching and access requirements. The link is public, not invite-only.
+The original release used a public `r2.dev` development URL. The current manifest
+uses `https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/` instead. The
+gateway reads the private bucket; do not enable a direct R2 URL or custom bucket
+domain. The tester website remains public, rather than invite-only.
 
 Official references: [pricing](https://developers.cloudflare.com/r2/pricing/),
 [public buckets](https://developers.cloudflare.com/r2/buckets/public-buckets/),
@@ -37,24 +44,27 @@ Official references: [pricing](https://developers.cloudflare.com/r2/pricing/),
    Workers plan or domain for this tester release.
 2. Create an R2 bucket such as `retro-arcade-testers`, Standard storage class,
    default jurisdiction. Do not reuse a bucket containing unrelated private data.
-3. Enable its public development URL and record that public URL. Enabling it makes
-   every object in this bucket accessible to anyone who knows an object URL.
+3. Leave the bucket's public development URL disabled and custom domains absent.
+   Use the deployed Workers Free gateway as the public asset origin. The R2
+   binding exposes write/delete methods, but the reviewed gateway only reads.
 4. With a Python installation that includes pip, prepare the emulator source
    bundle and then generate the release plan with the actual public bucket URL:
 
    ```powershell
    python -m pip install --target .local/python-deps boto3 py7zr
    python scripts/bundle-r2-sources.py
-   node scripts/prepare-r2.mjs --public-url=https://pub-REPLACE.r2.dev/
+   node scripts/prepare-r2.mjs --public-url=https://retro-arcade-downloads.lorenzwohlesser9.workers.dev/
    ```
 
    The script hashes only explicit game/firmware/cover mounts plus the emulator
    distribution and the prepared source/notices bundle under `.local/r2-extra/`.
    No large file copies or uploads occur. It writes ignored local plans and a
    pending manifest. GT4's ISO and private configuration are excluded.
-5. In bucket Settings, add the CORS policy from `.local/r2-release/cors.json`.
-   This permits GET/HEAD from the Pages origin and the local hosted-build test
-   origin. CORS is browser compatibility configuration, not access control.
+5. After uploading, run `npm run build:gateway`. Review and deploy the generated
+   `.local/r2-release/gateway-worker.mjs` to the named Worker with only the
+   `ASSETS` R2 binding. Keep Workers Free, Logs and Traces disabled, and avoid
+   paid integrations. The gateway supplies CORS for the Pages and local preview
+   origins. CORS is browser compatibility configuration, not authentication.
 
 ## Upload without exposing credentials
 
@@ -64,6 +74,13 @@ account-wide administrative token, paste keys into chat, put them in a command
 line or commit them. Use a short expiry or revoke the upload key after upload
 and verification. This release uses a bucket-only key expiring after 24 hours;
 stop the local uploader after verification to release its in-memory credentials.
+
+Before uploading any files, the uploader now lists existing objects and checks
+for incomplete multipart uploads. It refuses a projected bucket total above
+9 GB, unknown/incomplete listings or unfinished uploads needing review. This
+includes retained releases; it never deletes old objects automatically. Keep
+uploads exclusive, since concurrent writers and other buckets remain outside
+this point-in-time check.
 
 `scripts/upload-r2.py` provides a loopback-only form for entering the S3 Access
 Key ID and Secret Access Key directly. It holds credentials only in memory, uses
@@ -97,13 +114,13 @@ node scripts/verify-r2.mjs
 
 The authenticated uploader verifies every object's SHA-256 metadata. The public
 verifier checks every object's length and ETag, matching R2's single-PUT or 32 MiB
-multipart checksum rules; `r2.dev` does not expose custom S3 metadata. It also
+multipart checksum rules; the public gateway does not expose custom S3 metadata. It also
 checks JavaScript content type and browser CORS access, byte ranges and actual first
 bytes for each game, firmware and core package, and a browser preflight. It writes
 an ignored `library.verified.json` only after every check succeeds.
 
 Build locally with this verified manifest, then launch representative arcade and
-PS1 games in a browser through R2. Check GT2's separate Simulation launch, graphics
+PS1 games in a browser through the gateway. Check GT2's separate Simulation launch, graphics
 error guidance, controls, feedback, saves, restart and mobile layout. First PS1
 loads are 500–750 MB and can take several minutes. A successful file check does
 not certify gameplay, sound, gamepads or all games on every device.
@@ -144,3 +161,4 @@ but inspect incomplete multipart uploads after a forced process shutdown.
 To restore the interface preview, remove `deploy/hosted-library.json` from the
 source and deploy that change. This does not remove R2 objects or cancel billing.
 The local server's loopback bind and private-file protections remain intact.
+Keep the direct R2 URL disabled during rollback; never bypass the request cutoff.
