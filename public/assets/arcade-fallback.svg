@@ -9,7 +9,7 @@
 <text x="251" y="86" fill="#efae7b" font-family="Arial,sans-serif" font-size="17" text-anchor="middle" font-weight="bold">RETRO<tspan fill="#f5e6d5" font-weight="normal">ARCADE</tspan></text>
 <path d="m166 130 169 1-13 122-149-2Z" fill="#0d0f11" stroke="#343a3e" stroke-width="12"/>
 <path d="m181 145 139 1-10 92-122-1Z" fill="url(#glass)" stroke="#475152"/>
-<text x="251" y="179" text-anchor="middle" fill="#efb17d" font-family="monospace" font-size="17" font-weight="bold">RETRO</text><text x="251" y="202" text-anchor="middle" fill="#efb17d" font-family="monospace" font-size="21" font-weight="bold">ARCADE</text><text x="251" y="225" text-anchor="middle" fill="#bed2b3" font-family="monospace" font-size="8">[ PRESS START ]</text>
+<text x="251" y="179" text-anchor="middle" fill="#efb17d" font-family="monospace" font-size="17" font-weight="bold">RETRO</text><text x="251" y="202" text-anchor="middle" fill="#efb17d" font-family="monospace" font-size="21" font-weight="bold">ARCADE</text><text x="251" y="225" text-anchor="middle" fill="#bed2b3" font-family="monospace" font-size="8">START</text>
 <path d="m158 260 171 3 29 37H147Z" fill="#3b3b3b" stroke="#bf7b4b" stroke-width="2"/>
 <ellipse cx="200" cy="280" rx="17" ry="6" fill="#111416"/><path d="m200 280-3-26" stroke="#9b9e9d" stroke-width="5"/><circle cx="197" cy="252" r="10" fill="#e69152"/>
 <g stroke="#111" stroke-width="4"><ellipse cx="269" cy="276" rx="9" ry="5" fill="#e69152"/><ellipse cx="293" cy="276" rx="9" ry="5" fill="#d2c5a2"/><ellipse cx="278" cy="289" rx="9" ry="5" fill="#a34e39"/><ellipse cx="302" cy="289" rx="9" ry="5" fill="#ded6bf"/></g>

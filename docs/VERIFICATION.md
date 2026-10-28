@@ -1,5 +1,13 @@
 # Verification log
 
+## 28 October 2026 — Clean Start and launcher conveniences
+
+- Removed outer corner branding/settings, decorative captions, marquee subtitle, cabinet serial/side copy and boot diagnostic prose. The single entry button is exactly Start. Physical marquee branding and essential control labels remain; browser menus and the CRT preference are unchanged.
+- Added remembered title selection and a Recent filter. The current validated player must report started before entering history; titles are deduplicated in most-recent-first order and stored independently from favorites, display settings and game saves. Shared game links take priority. Recent history can be cleared from Settings, and an empty collection returns keyboard focus to Show All.
+- Gamepad A/Start can enter from the cabinet. Initial held state is seeded after camera movement to avoid also launching the selected game. Controller hardware was not available for a new physical check. Portrait cover art and touch targets are larger; phone browser controls fit a 390×844 viewport with client/scroll width both 390 and a 44px Play target.
+- Browser checks used the hosted build at the Pages project prefix with actual R2 assets: clean Start; empty Recent; restoring NFS selection through reload; a UMK3 game link overriding NFS; UMK3 started and appeared in Recent after Back; clearing Recent during gameplay and returning to an empty collection focused Show All and left zero iframes. No console warnings/errors were captured. No new full-game/audio/controller certification is implied.
+- All 37 automated checks pass, including four storage/history cases for link precedence, ordering, corruption/blocked storage and isolation from saves/favorites. Hosted build and source publication boundaries pass. No game files, BIOS, R2 objects, emulator mappings or save IDs changed.
+
 ## 26 October 2026 — Game-focused launcher and CRT monitor
 
 - Removed start-screen slogans, game descriptions, duplicate readiness labels and long in-screen explanations. Collection search and optional GT2 disc details remain. Settings contains Display, Controls and Saves & Help; longer instructions link to GitHub.
